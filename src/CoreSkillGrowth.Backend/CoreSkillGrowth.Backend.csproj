@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>XuanShuFourArtsB</AssemblyName>
+    <RootNamespace>XuanShuFourArts.Backend</RootNamespace>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\dist\Plugins\</OutputPath>
+    <DefineConstants>$(DefineConstants);BACKEND</DefineConstants>
+    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
+    <BackendDir>$(GameDir)\Backend</BackendDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="BackendPlugin.cs" />
+    <Compile Include="FourSetActiveSkillBonusPatch.cs" />
+    <Compile Include="FourSetBonusPatch.cs" />
+    <Compile Include="FourSetNormalAttackPowerPatch.cs" />
+    <Compile Include="PeiRanAutoHealSpeedPatch.cs" />
+    <Compile Include="TaiZuComboAmplifyPatch.cs" />
+    <Compile Include="..\CoreSkillGrowth.Shared\CoreSkillGrowthConfigPatch.cs" Link="CoreSkillGrowthConfigPatch.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(BackendDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaiwuModdingLib">
+      <HintPath>$(BackendDir)\TaiwuModdingLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameData.Shared">
+      <HintPath>$(BackendDir)\GameData.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameData.Combat.Math">
+      <HintPath>$(BackendDir)\GameData.Combat.Math.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameData.ArchiveData">
+      <HintPath>$(BackendDir)\GameData.ArchiveData.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameData">
+      <HintPath>$(BackendDir)\GameData.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

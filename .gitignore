@@ -1,0 +1,19 @@
+# Build intermediates
+bin/
+obj/
+**/bin/
+**/obj/
+
+# IDE/user-local files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Debug symbols and transient build files
+*.pdb
+*.cache
+
+# OS noise
+Thumbs.db
+Desktop.ini
