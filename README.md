@@ -4,6 +4,8 @@ Source project for the Steam Workshop mod **Four Arts of the Mystic Pivot** for 
 
 This repository contains the mod source code and release metadata. It is not affiliated with or endorsed by the developers or publishers of The Scroll of Taiwu.
 
+Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/ARCHITECTURE.zh-CN.md).
+
 ## Current Release
 
 - Mod version: `1.0.1.0`
