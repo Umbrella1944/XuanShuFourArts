@@ -1,111 +1,70 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using CoreSkillGrowth.Shared;
+using GameData.Common;
+using GameData.DomainEvents;
 using GameData.Domains;
-using GameData.Domains.Character;
+using GameData.Domains.Combat;
 using HarmonyLib;
 
 namespace XuanShuFourArts.Backend;
 
-internal static class PeiRanAutoHealThrottleStore
+internal static class PeiRanAutoHealRuntime
 {
-    private const short OfficialNewInjurySpeed = 2;
     private const short ActiveSpeed = 1;
     private const short SuppressedSpeed = 0;
     private const int BaseTicksPerActiveHeal = 10;
-    private const int FullSetTicksPerActiveHeal = 6;
-    private const short PeiRanJue = 0;
-    private const short XiaoZongYueGong = 1;
-    private const short ShuiHuoYingQiGong = 2;
-    private const short TaiZuChangQuan = 3;
+    private const int FullSetTicksPerActiveHeal = 7;
 
-    private static readonly Type LoongWoodImplementHealType =
-        AccessTools.TypeByName("GameData.Domains.SpecialEffect.Animal.Loong.Neigong.LoongWoodImplementHeal");
+    private static readonly Dictionary<int, HealThrottleState> States = new Dictionary<int, HealThrottleState>();
 
-    private static readonly Type CombatSkillEffectBaseType =
-        AccessTools.TypeByName("GameData.Domains.SpecialEffect.CombatSkill.CombatSkillEffectBase");
-
-    private static readonly Type SpecialEffectBaseType =
-        AccessTools.TypeByName("GameData.Domains.SpecialEffect.SpecialEffectBase");
-
-    private static readonly Type CombatCharacterType =
-        AccessTools.TypeByName("GameData.Domains.Combat.CombatCharacter");
-
-    internal static readonly PropertyInfo EffectBaseProperty =
-        AccessTools.Property(LoongWoodImplementHealType, "EffectBase");
-
-    private static readonly PropertyInfo EffectIdProperty =
-        AccessTools.Property(CombatSkillEffectBaseType, "EffectId");
-
-    private static readonly PropertyInfo CombatCharProperty =
-        AccessTools.Property(SpecialEffectBaseType, "CombatChar");
-
-    internal static readonly FieldInfo InnerNewSpeedsField =
-        AccessTools.Field(CombatCharacterType, "InnerInjuryAutoHealSpeeds");
-
-    internal static readonly FieldInfo OuterNewSpeedsField =
-        AccessTools.Field(CombatCharacterType, "OuterInjuryAutoHealSpeeds");
-
-    internal static readonly FieldInfo InnerOldSpeedsField =
-        AccessTools.Field(CombatCharacterType, "InnerOldInjuryAutoHealSpeeds");
-
-    internal static readonly FieldInfo OuterOldSpeedsField =
-        AccessTools.Field(CombatCharacterType, "OuterOldInjuryAutoHealSpeeds");
-
-    private static readonly FieldInfo CombatCharacterIdField =
-        AccessTools.Field(CombatCharacterType, "_id");
-
-    private static readonly ConditionalWeakTable<object, HealThrottleState> States = new();
-
-    internal static void RegisterIfPeiRanEffect(object implement)
+    internal static void RegisterCombatBegin()
     {
-        object effectBase = EffectBaseProperty?.GetValue(implement);
-        if (effectBase == null)
+        States.Clear();
+
+        foreach (int charId in DomainManager.Combat.GetTeamCharacterIds())
         {
-            return;
+            if (!DomainManager.Combat.TryGetElement_CombatCharacterDict(charId, out CombatCharacter combatChar) ||
+                !combatChar.GetCharacter().IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.PeiRanJue) ||
+                !DecoupledCoreSkillEffects.CanAffectSkill(combatChar, CoreSkillGrowthConfigPatch.PeiRanJue))
+            {
+                continue;
+            }
+
+            HealThrottleState state = new HealThrottleState
+            {
+                InnerNewIndex = AddSpeed(combatChar.InnerInjuryAutoHealSpeeds, ActiveSpeed),
+                OuterNewIndex = AddSpeed(combatChar.OuterInjuryAutoHealSpeeds, ActiveSpeed),
+                InnerOldIndex = AddSpeed(combatChar.InnerOldInjuryAutoHealSpeeds, ActiveSpeed),
+                OuterOldIndex = AddSpeed(combatChar.OuterOldInjuryAutoHealSpeeds, ActiveSpeed)
+            };
+
+            if (state.IsComplete)
+            {
+                States[combatChar.GetId()] = state;
+            }
         }
-
-        int effectId = Convert.ToInt32(EffectIdProperty.GetValue(effectBase));
-        if (!CoreSkillGrowthConfigPatch.IsPeiRanCustomEffectId(effectId))
-        {
-            return;
-        }
-
-        object combatChar = CombatCharProperty.GetValue(effectBase);
-        if (combatChar == null)
-        {
-            return;
-        }
-
-        HealThrottleState state = new()
-        {
-            InnerNewIndex = ReplaceLastSpeed(GetSpeeds(InnerNewSpeedsField, combatChar), OfficialNewInjurySpeed, ActiveSpeed),
-            OuterNewIndex = ReplaceLastSpeed(GetSpeeds(OuterNewSpeedsField, combatChar), OfficialNewInjurySpeed, ActiveSpeed),
-            InnerOldIndex = FindLastSpeed(GetSpeeds(InnerOldSpeedsField, combatChar), ActiveSpeed),
-            OuterOldIndex = FindLastSpeed(GetSpeeds(OuterOldSpeedsField, combatChar), ActiveSpeed)
-        };
-
-        if (!state.IsComplete)
-        {
-            return;
-        }
-
-        States.Remove(combatChar);
-        States.Add(combatChar, state);
     }
 
-    internal static void BeforeAutoHealUpdate(object combatChar)
+    internal static void ClearAll()
     {
-        if (combatChar == null || !States.TryGetValue(combatChar, out HealThrottleState state))
+        States.Clear();
+    }
+
+    internal static void BeforeAutoHealUpdate(CombatCharacter combatChar)
+    {
+        if (combatChar == null || !States.TryGetValue(combatChar.GetId(), out HealThrottleState state))
         {
             return;
         }
 
         state.DisabledForThisTick = false;
         state.TickCounter++;
-        int ticksPerActiveHeal = GetTicksPerActiveHeal(combatChar);
+        int ticksPerActiveHeal = FourSetActiveSkillBonus.HasFullSetEquipped(combatChar.GetId())
+            ? FullSetTicksPerActiveHeal
+            : BaseTicksPerActiveHeal;
+
         if (state.TickCounter % ticksPerActiveHeal == 0)
         {
             EnsureSpeed(combatChar, state, ActiveSpeed);
@@ -116,37 +75,11 @@ internal static class PeiRanAutoHealThrottleStore
         state.DisabledForThisTick = true;
     }
 
-    private static int GetTicksPerActiveHeal(object combatChar)
+    internal static void AfterAutoHealUpdate(CombatCharacter combatChar)
     {
-        try
-        {
-            int characterId = Convert.ToInt32(CombatCharacterIdField?.GetValue(combatChar));
-            Character character = DomainManager.Character.GetElement_Objects(characterId);
-            if (character != null &&
-                character.IsCombatSkillEquipped(PeiRanJue) &&
-                character.IsCombatSkillEquipped(XiaoZongYueGong) &&
-                character.IsCombatSkillEquipped(ShuiHuoYingQiGong) &&
-                character.IsCombatSkillEquipped(TaiZuChangQuan))
-            {
-                return FullSetTicksPerActiveHeal;
-            }
-        }
-        catch
-        {
-            // Keep the base interval if combat character lookup is unavailable.
-        }
-
-        return BaseTicksPerActiveHeal;
-    }
-
-    internal static void AfterAutoHealUpdate(object combatChar)
-    {
-        if (combatChar == null || !States.TryGetValue(combatChar, out HealThrottleState state))
-        {
-            return;
-        }
-
-        if (!state.DisabledForThisTick)
+        if (combatChar == null ||
+            !States.TryGetValue(combatChar.GetId(), out HealThrottleState state) ||
+            !state.DisabledForThisTick)
         {
             return;
         }
@@ -155,54 +88,23 @@ internal static class PeiRanAutoHealThrottleStore
         state.DisabledForThisTick = false;
     }
 
-    private static void EnsureSpeed(object combatChar, HealThrottleState state, short speed)
-    {
-        SetSlot(GetSpeeds(InnerNewSpeedsField, combatChar), state.InnerNewIndex, speed);
-        SetSlot(GetSpeeds(OuterNewSpeedsField, combatChar), state.OuterNewIndex, speed);
-        SetSlot(GetSpeeds(InnerOldSpeedsField, combatChar), state.InnerOldIndex, speed);
-        SetSlot(GetSpeeds(OuterOldSpeedsField, combatChar), state.OuterOldIndex, speed);
-    }
-
-    private static List<short> GetSpeeds(FieldInfo field, object combatChar)
-    {
-        return field?.GetValue(combatChar) as List<short>;
-    }
-
-    private static int ReplaceLastSpeed(List<short> speeds, short oldSpeed, short newSpeed)
+    private static int AddSpeed(List<short> speeds, short speed)
     {
         if (speeds == null)
         {
             return -1;
         }
 
-        for (int i = speeds.Count - 1; i >= 0; i--)
-        {
-            if (speeds[i] == oldSpeed)
-            {
-                speeds[i] = newSpeed;
-                return i;
-            }
-        }
-
-        return -1;
+        speeds.Add(speed);
+        return speeds.Count - 1;
     }
 
-    private static int FindLastSpeed(List<short> speeds, short speed)
+    private static void EnsureSpeed(CombatCharacter combatChar, HealThrottleState state, short speed)
     {
-        if (speeds == null)
-        {
-            return -1;
-        }
-
-        for (int i = speeds.Count - 1; i >= 0; i--)
-        {
-            if (speeds[i] == speed)
-            {
-                return i;
-            }
-        }
-
-        return -1;
+        SetSlot(combatChar.InnerInjuryAutoHealSpeeds, state.InnerNewIndex, speed);
+        SetSlot(combatChar.OuterInjuryAutoHealSpeeds, state.OuterNewIndex, speed);
+        SetSlot(combatChar.InnerOldInjuryAutoHealSpeeds, state.InnerOldIndex, speed);
+        SetSlot(combatChar.OuterOldInjuryAutoHealSpeeds, state.OuterOldIndex, speed);
     }
 
     private static void SetSlot(List<short> speeds, int index, short speed)
@@ -236,28 +138,30 @@ internal static class PeiRanAutoHealThrottleStore
     }
 }
 
-[HarmonyPatch]
-internal static class PeiRanAutoHealRegisterPatch
+[HarmonyPatch(typeof(Events), "RaiseCombatBegin")]
+internal static class PeiRanCombatBeginPatch
 {
-    [HarmonyTargetMethod]
-    private static MethodBase TargetMethod()
-    {
-        return AccessTools.Method(
-            AccessTools.TypeByName("GameData.Domains.SpecialEffect.Animal.Loong.Neigong.LoongWoodImplementHeal"),
-            "OnCombatBegin");
-    }
-
     [HarmonyPostfix]
-    private static void RegisterThrottle(object __instance)
+    private static void RegisterAutoHeal()
     {
         try
         {
-            PeiRanAutoHealThrottleStore.RegisterIfPeiRanEffect(__instance);
+            PeiRanAutoHealRuntime.RegisterCombatBegin();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed to register PeiRan auto-heal throttle: {ex}");
+            Console.WriteLine($"[XuanShuFourArts] failed to register PeiRan DR auto-heal: {ex}");
         }
+    }
+}
+
+[HarmonyPatch(typeof(Events), "RaiseCombatSettlement")]
+internal static class PeiRanCombatSettlementPatch
+{
+    [HarmonyPostfix]
+    private static void ClearRuntime()
+    {
+        PeiRanAutoHealRuntime.ClearAll();
     }
 }
 
@@ -272,34 +176,47 @@ internal static class PeiRanAutoHealUpdatePatch
             "TimeUpdateAutoHeal",
             new[]
             {
-                AccessTools.TypeByName("GameData.Common.DataContext"),
-                AccessTools.TypeByName("GameData.Domains.Combat.CombatCharacter")
+                typeof(DataContext),
+                typeof(CombatCharacter)
             });
     }
 
+    [HarmonyPrepare]
+    private static bool Prepare()
+    {
+        MethodBase target = TargetMethod();
+        if (target != null)
+        {
+            return true;
+        }
+
+        Console.WriteLine("[XuanShuFourArts] PeiRan DR auto-heal patch skipped: TimeUpdateAutoHeal target not found.");
+        return false;
+    }
+
     [HarmonyPrefix]
-    private static void BeforeAutoHealUpdate(object combatChar)
+    private static void BeforeAutoHealUpdate(CombatCharacter combatChar)
     {
         try
         {
-            PeiRanAutoHealThrottleStore.BeforeAutoHealUpdate(combatChar);
+            PeiRanAutoHealRuntime.BeforeAutoHealUpdate(combatChar);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed before PeiRan auto-heal update: {ex}");
+            Console.WriteLine($"[XuanShuFourArts] failed before PeiRan DR auto-heal update: {ex}");
         }
     }
 
     [HarmonyPostfix]
-    private static void AfterAutoHealUpdate(object combatChar)
+    private static void AfterAutoHealUpdate(CombatCharacter combatChar)
     {
         try
         {
-            PeiRanAutoHealThrottleStore.AfterAutoHealUpdate(combatChar);
+            PeiRanAutoHealRuntime.AfterAutoHealUpdate(combatChar);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed after PeiRan auto-heal update: {ex}");
+            Console.WriteLine($"[XuanShuFourArts] failed after PeiRan DR auto-heal update: {ex}");
         }
     }
 }

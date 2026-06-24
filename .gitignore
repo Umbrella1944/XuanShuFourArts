@@ -13,6 +13,24 @@ obj/
 # Debug symbols and transient build files
 *.pdb
 *.cache
+*.log
+*.tmp
+*.bak
+
+# Packaged releases
+*.zip
+*.7z
+*.rar
+artifacts/
+release/
+
+# Local publish backups
+*.overwritten-backup-*
+Config.Lua.overwritten-backup-*
+
+# Build outputs generated into the release folder
+dist/Plugins/*.dll
+dist/Plugins/*.deps.json
 
 # OS noise
 Thumbs.db

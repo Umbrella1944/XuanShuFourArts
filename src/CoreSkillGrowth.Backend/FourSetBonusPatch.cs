@@ -12,12 +12,7 @@ namespace XuanShuFourArts.Backend;
 })]
 internal static class FourSetBonusPatch
 {
-    private const short PeiRanJue = 0;
-    private const short XiaoZongYueGong = 1;
-    private const short ShuiHuoYingQiGong = 2;
-    private const short TaiZuChangQuan = 3;
-
-    private const int MajorCombatPropertyBonusPercent = 20;
+    private const int MajorCombatPropertyBonusPercent = 15;
 
     [HarmonyPostfix]
     private static void AddFourSetBonus(
@@ -31,7 +26,7 @@ internal static class FourSetBonusPatch
             if (__instance == null ||
                 !IsMajorCombatProperty(propertyType) ||
                 (valueSumType != EDataSumType.All && valueSumType != EDataSumType.OnlyAdd) ||
-                !HasFullSetEquipped(__instance))
+                !FourSetActiveSkillBonus.HasFullSetEquipped(__instance))
             {
                 return;
             }
@@ -42,14 +37,6 @@ internal static class FourSetBonusPatch
         {
             Console.WriteLine($"[XuanShuFourArts] four-set bonus failed: {ex}");
         }
-    }
-
-    private static bool HasFullSetEquipped(Character character)
-    {
-        return character.IsCombatSkillEquipped(PeiRanJue) &&
-            character.IsCombatSkillEquipped(XiaoZongYueGong) &&
-            character.IsCombatSkillEquipped(ShuiHuoYingQiGong) &&
-            character.IsCombatSkillEquipped(TaiZuChangQuan);
     }
 
     private static bool IsMajorCombatProperty(ECharacterPropertyReferencedType propertyType)

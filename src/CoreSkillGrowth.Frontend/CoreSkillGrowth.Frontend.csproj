@@ -12,7 +12,8 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\dist\Plugins\</OutputPath>
-    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
+    <GameDir Condition="'$(GameDir)' == '' and '$(TAIWU_GAME_DIR)' != ''">$(TAIWU_GAME_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
     <ManagedDir>$(GameDir)\The Scroll of Taiwu_Data\Managed</ManagedDir>
   </PropertyGroup>
 

@@ -1,4 +1,5 @@
 using System;
+using CoreSkillGrowth.Shared;
 using GameData.Combat.Math;
 using GameData.Domains;
 using GameData.Domains.Character;
@@ -10,32 +11,33 @@ namespace XuanShuFourArts.Backend;
 
 internal static class FourSetActiveSkillBonus
 {
-    private const short PeiRanJue = 0;
-    private const short XiaoZongYueGong = 1;
-    private const short ShuiHuoYingQiGong = 2;
-    private const short TaiZuChangQuan = 3;
+    internal const int ActiveSkillBonusPercent = 40;
 
     internal static bool HasFullSetEquipped(int characterId)
     {
-        Character character = DomainManager.Character.GetElement_Objects(characterId);
+        return HasFullSetEquipped(DomainManager.Character.GetElement_Objects(characterId));
+    }
+
+    internal static bool HasFullSetEquipped(Character character)
+    {
         return character != null &&
-            character.IsCombatSkillEquipped(PeiRanJue) &&
-            character.IsCombatSkillEquipped(XiaoZongYueGong) &&
-            character.IsCombatSkillEquipped(ShuiHuoYingQiGong) &&
-            character.IsCombatSkillEquipped(TaiZuChangQuan);
+            character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.PeiRanJue) &&
+            character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.XiaoZongYueGong) &&
+            character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong) &&
+            character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
     }
 
     internal static bool IsAffectingSetMoveSkill(CombatCharacter combatChar)
     {
         return combatChar != null &&
-            combatChar.GetAffectingMoveSkillId() == XiaoZongYueGong &&
+            combatChar.GetAffectingMoveSkillId() == CoreSkillGrowthConfigPatch.XiaoZongYueGong &&
             HasFullSetEquipped(combatChar.GetId());
     }
 
     internal static bool IsAffectingSetDefendSkill(CombatCharacter combatChar)
     {
         return combatChar != null &&
-            combatChar.GetAffectingDefendSkillId() == ShuiHuoYingQiGong &&
+            combatChar.GetAffectingDefendSkillId() == CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong &&
             HasFullSetEquipped(combatChar.GetId());
     }
 }
@@ -54,7 +56,8 @@ internal static class FourSetActiveMoveSpeedPatch
             }
 
             CombatSkillKey skillKey = skill.GetId();
-            if (skillKey.SkillTemplateId != 1 || !DomainManager.Combat.IsCharInCombat(skillKey.CharId))
+            if (skillKey.SkillTemplateId != CoreSkillGrowthConfigPatch.XiaoZongYueGong ||
+                !DomainManager.Combat.IsCharInCombat(skillKey.CharId))
             {
                 return;
             }
@@ -65,7 +68,10 @@ internal static class FourSetActiveMoveSpeedPatch
                 return;
             }
 
-            __result = (short)Math.Clamp(__result * 2, short.MinValue, short.MaxValue);
+            __result = (short)Math.Clamp(
+                __result + __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100,
+                short.MinValue,
+                short.MaxValue);
         }
         catch (Exception ex)
         {
@@ -91,7 +97,7 @@ internal static class FourSetActiveDefendAvoidPatch
                 return;
             }
 
-            __result *= 2;
+            __result += __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100;
         }
         catch (Exception ex)
         {
@@ -120,7 +126,7 @@ internal static class FourSetActiveDefendPenetrateResistPatch
                 return;
             }
 
-            __result *= 2;
+            __result += __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100;
         }
         catch (Exception ex)
         {

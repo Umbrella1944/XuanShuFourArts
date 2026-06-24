@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CoreSkillGrowth.Shared;
+using FrameWork;
 using GameData.Domains.CombatSkill;
+using Game.Views.Combat;
 using Game.Views.CharacterMenu;
 using Game.Views.MouseTips;
 using HarmonyLib;
@@ -13,11 +16,6 @@ namespace XuanShuFourArts.Frontend;
 
 internal static class FourSetUiState
 {
-    private const short PeiRanJue = 0;
-    private const short XiaoZongYueGong = 1;
-    private const short ShuiHuoYingQiGong = 2;
-    private const short TaiZuChangQuan = 3;
-
     private const string Marker = "<!--XuanShuFourArtsSet-->";
     private static int _currentCount = -1;
 
@@ -26,32 +24,28 @@ internal static class FourSetUiState
         int count = 0;
         if (equippedSkills != null)
         {
-            if (equippedSkills.Contains(PeiRanJue))
+            if (equippedSkills.Contains(CoreSkillGrowthConfigPatch.PeiRanJue))
             {
                 count++;
             }
 
-            if (equippedSkills.Contains(XiaoZongYueGong))
+            if (equippedSkills.Contains(CoreSkillGrowthConfigPatch.XiaoZongYueGong))
             {
                 count++;
             }
 
-            if (equippedSkills.Contains(ShuiHuoYingQiGong))
+            if (equippedSkills.Contains(CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong))
             {
                 count++;
             }
 
-            if (equippedSkills.Contains(TaiZuChangQuan))
+            if (equippedSkills.Contains(CoreSkillGrowthConfigPatch.TaiZuChangQuan))
             {
                 count++;
             }
         }
 
-        if (_currentCount != count)
-        {
-            _currentCount = count;
-            Console.WriteLine($"[XuanShuFourArts] four-set equipped count = {_currentCount}/4");
-        }
+        _currentCount = count;
     }
 
     internal static void UpdateFromPlans(IEnumerable<ICollection<short>> equippedSkillPlans)
@@ -78,10 +72,10 @@ internal static class FourSetUiState
 
     internal static bool IsSetSkill(short skillId)
     {
-        return skillId == PeiRanJue ||
-            skillId == XiaoZongYueGong ||
-            skillId == ShuiHuoYingQiGong ||
-            skillId == TaiZuChangQuan;
+        return skillId == CoreSkillGrowthConfigPatch.PeiRanJue ||
+            skillId == CoreSkillGrowthConfigPatch.XiaoZongYueGong ||
+            skillId == CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong ||
+            skillId == CoreSkillGrowthConfigPatch.TaiZuChangQuan;
     }
 
     internal static string BuildSetHint()
@@ -96,15 +90,15 @@ internal static class FourSetUiState
         {
             title = $"Mystic Pivot Four Arts {displayCount}/4";
             desc = detailMode
-                ? "Set effect\n4-piece: Attack, Defense, Hit, and Deflection +20%.\nBlood-Rift - Hairline Rift: Normal Attack Power +100%.\nBlood-Rift - Tide of Aftershadows: Hit Accumulation -15% per hit; damage +150%-250%.\nReturning-Frame - Wounds Return to Pivot: Inner Art passive recovery +66.7%.\nShadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus is doubled.\nTwofold Qi - Double Rampart: While Yin-Yang Form-Restoring Art is active, its active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses are doubled."
-                : "4pc: Major combat attributes +20%.\nHold Alt for details.";
+                ? "4-piece set effect\nFour Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\nBlood-Rift - Hairline Rift: Normal Attack Power +100%.\nBlood-Rift - Tide of Aftershadows: Normal Attack hits have a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit; each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit cannot trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack.\nReturning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\nShadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\nTwofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active."
+                : "4pc: Major combat attributes +15%.\nHold Alt for details.";
         }
         else
         {
             title = $"玄枢四诀 {displayCount}/4";
             desc = detailMode
-                ? "套装效果\n4件：攻击、防御、命中、化解 +20%。\n万噬血隙·一线微裂：普通攻击威力 +100%。\n万噬血隙·后影潮复：血隙连击命中累积每段 -15%，连续伤害 +150%至250%。\n玄息归骸·百损归枢：内功被动恢复效果 +66.7%。\n照影游身步·逐影成双：照影游身步持续期间，施展移动速度提高效果翻倍。\n两仪还形功·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果翻倍。"
-                : "4件：主战斗属性 +20%。\n按住 Alt 查看详细效果。";
+                ? "4件套装效果\n四诀共鸣：攻击、防御、命中、化解 +15%。\n万噬血隙·一线微裂：普通攻击威力 +100%。\n万噬血隙·后影潮复：普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击无法被反震，进入伤害结算时消耗全部层数，若被中断则损失1层。\n玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。"
+                : "4件：主战斗属性 +15%。\n按住 Alt 查看详细效果。";
         }
 
         return
@@ -127,23 +121,23 @@ internal static class FourSetUiState
             return
                 $"<color={activeColor}><b>Mystic Pivot Four Arts</b></color>\n" +
                 $"Progress: {displayCount}/4\n" +
-                "4-piece effect: Attack, Defense, Hit, and Deflection +20%.\n" +
+                "Four Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\n" +
                 "Blood-Rift - Hairline Rift: Normal Attack Power +100%.\n" +
-                "Blood-Rift - Tide of Aftershadows: Hit Accumulation -15% per hit; damage +150%-250%.\n" +
-                "Returning-Frame - Wounds Return to Pivot: Inner Art passive recovery +66.7%.\n" +
-                "Shadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus is doubled.\n" +
-                "Twofold Qi - Double Rampart: While Yin-Yang Form-Restoring Art is active, its active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses are doubled.";
+                "Blood-Rift - Tide of Aftershadows: Normal Attack hits have a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit; each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit cannot trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack.\n" +
+                "Returning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\n" +
+                "Shadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\n" +
+                "Twofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active.";
         }
 
         return
             $"<color={activeColor}><b>玄枢四诀 套装效果</b></color>\n" +
             $"当前进度：{displayCount}/4\n" +
-            "四件同运：攻击、防御、命中、化解 +20%。\n" +
+            "四诀共鸣：攻击、防御、命中、化解 +15%。\n" +
             "万噬血隙·一线微裂：普通攻击威力 +100%。\n" +
-            "万噬血隙·后影潮复：血隙连击命中累积每段 -15%，连续伤害 +150%至250%。\n" +
-            "玄息归骸·百损归枢：内功被动恢复效果 +66.7%。\n" +
-            "照影游身步·逐影成双：照影游身步持续期间，施展移动速度提高效果翻倍。\n" +
-            "两仪还形功·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果翻倍。";
+            "万噬血隙·后影潮复：普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击无法被反震，进入伤害结算时消耗全部层数，若被中断则损失1层。\n" +
+            "玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n" +
+            "照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n" +
+            "两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。";
     }
 
     internal static string AppendSetHint(short skillId, string originalText)
@@ -154,6 +148,19 @@ internal static class FourSetUiState
         }
 
         return originalText + "\n\n" + Marker + BuildSetHint();
+    }
+
+    internal static string RemoveSetHint(string originalText)
+    {
+        if (string.IsNullOrEmpty(originalText))
+        {
+            return originalText;
+        }
+
+        int markerIndex = originalText.IndexOf(Marker, StringComparison.Ordinal);
+        return markerIndex >= 0
+            ? originalText.Substring(0, markerIndex).TrimEnd()
+            : originalText;
     }
 
     private static bool IsEnglishLanguage()
@@ -168,6 +175,63 @@ internal static class FourSetUiState
         {
             return false;
         }
+    }
+}
+
+[HarmonyPatch(typeof(ViewCombat), "OnEnable")]
+internal static class FourSetCombatViewEnablePatch
+{
+    [HarmonyPostfix]
+    private static void MarkCombatViewActive(ViewCombat __instance)
+    {
+        FourSetCombatViewState.MarkActive(__instance);
+    }
+}
+
+[HarmonyPatch(typeof(ViewCombat), "OnCombatEnd")]
+internal static class FourSetCombatViewEndPatch
+{
+    [HarmonyPostfix]
+    private static void MarkCombatViewInactive(ViewCombat __instance)
+    {
+        FourSetCombatViewState.MarkInactive(__instance);
+    }
+}
+
+[HarmonyPatch(typeof(ViewCombat), "OnDestroy")]
+internal static class FourSetCombatViewDestroyPatch
+{
+    [HarmonyPostfix]
+    private static void MarkCombatViewDestroyed(ViewCombat __instance)
+    {
+        FourSetCombatViewState.MarkInactive(__instance);
+    }
+}
+
+internal static class FourSetCombatViewState
+{
+    private static readonly HashSet<int> ActiveCombatViews = new HashSet<int>();
+
+    internal static bool ShouldSuppressSetHint => ActiveCombatViews.Count > 0;
+
+    internal static void MarkActive(ViewCombat view)
+    {
+        if (view != null)
+        {
+            ActiveCombatViews.Add(view.GetInstanceID());
+        }
+
+        FourSetNewTooltipCombatSkillPatch.HideFloatingHint();
+    }
+
+    internal static void MarkInactive(ViewCombat view)
+    {
+        if (view != null)
+        {
+            ActiveCombatViews.Remove(view.GetInstanceID());
+        }
+
+        FourSetNewTooltipCombatSkillPatch.HideFloatingHint();
     }
 }
 
@@ -247,13 +311,48 @@ internal static class FourSetEquippedSkillCachePatch
     }
 }
 
+[HarmonyPatch(typeof(ViewCombat), "OnGetProactiveSkillList")]
+internal static class FourSetCombatSkillCachePatch
+{
+    [HarmonyPostfix]
+    private static void CacheCombatSkillList(int charId)
+    {
+        try
+        {
+            CombatModel model = SingletonObject.getInstance<CombatModel>();
+            if (model == null || charId != model.SelfCharId)
+            {
+                return;
+            }
+
+            if (!model.ProactiveSkillData.TryGetValue(charId, out IReadOnlyList<CombatSkillDisplayData> skills))
+            {
+                return;
+            }
+
+            List<short> equippedSkills = new List<short>(skills.Count);
+            for (int i = 0; i < skills.Count; i++)
+            {
+                CombatSkillDisplayData skill = skills[i];
+                if (skill != null)
+                {
+                    equippedSkills.Add(skill.TemplateId);
+                }
+            }
+
+            FourSetUiState.UpdateFrom(equippedSkills);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[XuanShuFourArts] four-set combat cache failed: {ex}");
+        }
+    }
+}
+
 [HarmonyPatch(typeof(MouseTipCombatSkill), "RefreshCombatSkillPanel")]
 internal static class FourSetMouseTipPanelPatch
 {
     private const string HintNodeName = "XuanShuFourArtsSetHint";
-    private static bool _loggedRefresh;
-    private static bool _loggedCreate;
-
     private static readonly FieldInfo CombatSkillTemplateIdField =
         AccessTools.Field(typeof(MouseTipCombatSkill), "_combatSkillTemplateId");
 
@@ -262,15 +361,18 @@ internal static class FourSetMouseTipPanelPatch
     {
         try
         {
-            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(__instance));
             TextMeshProUGUI hint = FindHint(__instance);
-            if (!_loggedRefresh)
+            if (FourSetCombatViewState.ShouldSuppressSetHint)
             {
-                Console.WriteLine(
-                    $"[XuanShuFourArts] mouse tip refresh reached. skill={skillId}, set={FourSetUiState.IsSetSkill(skillId)}");
-                _loggedRefresh = true;
+                if (hint != null)
+                {
+                    hint.gameObject.SetActive(false);
+                }
+
+                return;
             }
 
+            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(__instance));
             if (!FourSetUiState.IsSetSkill(skillId))
             {
                 if (hint != null)
@@ -327,7 +429,7 @@ internal static class FourSetMouseTipPanelPatch
         float preferredHeight = Mathf.Clamp(
             hint.GetPreferredValues(hint.text ?? string.Empty, preferredWidth - 24f, 0f).y + 18f,
             detailMode ? 144f : 72f,
-            detailMode ? 280f : 140f);
+            detailMode ? 280f : 190f);
 
         layoutElement.minWidth = 520f;
         layoutElement.preferredWidth = preferredWidth;
@@ -345,13 +447,6 @@ internal static class FourSetMouseTipPanelPatch
 
         Transform parent = anchor != null ? anchor.transform.parent : mouseTip.transform;
         GameObject hintObject;
-        if (!_loggedCreate)
-        {
-            Console.WriteLine(
-                $"[XuanShuFourArts] creating four-set hint. anchor={(anchor != null ? anchor.gameObject.name : "null")}, parent={parent.gameObject.name}");
-            _loggedCreate = true;
-        }
-
         if (anchor != null)
         {
             hintObject = UnityEngine.Object.Instantiate(anchor.gameObject, parent, false);
@@ -487,8 +582,6 @@ internal static class FourSetNewTooltipCombatSkillPatch
     private const string HintNodeName = "XuanShuFourArtsSetHintNew";
     private const string PanelNodeName = "XuanShuFourArtsSetHintPanelNew";
     private const string OverlayCanvasName = "XuanShuFourArtsOverlayCanvas";
-    private static bool _loggedRefresh;
-    private static bool _loggedCreate;
     private static RectTransform _floatingPanelRect;
     private static TextMeshProUGUI _floatingHint;
     private static RectTransform _overlayCanvasRect;
@@ -509,16 +602,15 @@ internal static class FourSetNewTooltipCombatSkillPatch
     {
         try
         {
-            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(tooltip));
             TextMeshProUGUI hint = FindHint();
-            bool isSetSkill = FourSetUiState.IsSetSkill(skillId);
-            if (!_loggedRefresh)
+            if (FourSetCombatViewState.ShouldSuppressSetHint)
             {
-                Console.WriteLine(
-                    $"[XuanShuFourArts] new tooltip refresh reached. skill={skillId}, set={isSetSkill}");
-                _loggedRefresh = true;
+                SetHintVisible(hint, false);
+                return;
             }
 
+            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(tooltip));
+            bool isSetSkill = FourSetUiState.IsSetSkill(skillId);
             if (!isSetSkill)
             {
                 SetHintVisible(hint, false);
@@ -553,11 +645,11 @@ internal static class FourSetNewTooltipCombatSkillPatch
         RectTransform panelRect = _floatingPanelRect;
         if (panelRect != null)
         {
-            float width = detailMode ? 560f : 430f;
+            float width = detailMode ? 640f : 430f;
             float preferredHeight = Mathf.Clamp(
                 hint.GetPreferredValues(hint.text ?? string.Empty, width - 32f, 0f).y + 28f,
                 detailMode ? 170f : 90f,
-                detailMode ? 430f : 170f);
+                detailMode ? 420f : 210f);
 
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -593,13 +685,6 @@ internal static class FourSetNewTooltipCombatSkillPatch
             DirectEffectDescTextField.GetValue(tooltip) as TextMeshProUGUI ??
             DescTextField.GetValue(tooltip) as TextMeshProUGUI ??
             FindLastText(tooltip);
-
-        if (!_loggedCreate)
-        {
-            Console.WriteLine(
-                $"[XuanShuFourArts] creating overlay tooltip hint. anchor={(anchor != null ? anchor.gameObject.name : "null")}, canvas={canvas.gameObject.name}, screen={Screen.width}x{Screen.height}");
-            _loggedCreate = true;
-        }
 
         GameObject panelObject = new GameObject(
             PanelNodeName,
@@ -707,6 +792,22 @@ internal static class FourSetNewTooltipCombatSkillPatch
             return;
         }
 
+        Vector2 size = panelRect.sizeDelta;
+        if (FourSetUiState.IsDetailMode())
+        {
+            panelRect.pivot = new Vector2(1f, 0f);
+            float x = Mathf.Clamp(
+                canvasRect.rect.xMax - 28f,
+                canvasRect.rect.xMin + size.x + 16f,
+                canvasRect.rect.xMax - 16f);
+            float y = Mathf.Clamp(
+                canvasRect.rect.yMin + 122f,
+                canvasRect.rect.yMin + 16f,
+                canvasRect.rect.yMax - size.y - 16f);
+            panelRect.anchoredPosition = new Vector2(x, y);
+            return;
+        }
+
         Vector3[] corners = new Vector3[4];
         tooltipRect.GetWorldCorners(corners);
 
@@ -715,7 +816,6 @@ internal static class FourSetNewTooltipCombatSkillPatch
             ? sourceCanvas.worldCamera
             : null;
 
-        Vector2 size = panelRect.sizeDelta;
         Vector2 leftBottomLocal;
         Vector2 leftTopLocal;
         Vector2 rightTopLocal;
@@ -820,16 +920,24 @@ internal static class FourSetCombatSkillIntroPatch
     {
         try
         {
+            TextMeshProUGUI desc = __instance.CGet<TextMeshProUGUI>("Description");
+            if (desc == null)
+            {
+                return;
+            }
+
+            if (FourSetCombatViewState.ShouldSuppressSetHint)
+            {
+                desc.text = FourSetUiState.RemoveSetHint(desc.text);
+                return;
+            }
+
             if (displayData == null || !FourSetUiState.IsSetSkill(displayData.TemplateId))
             {
                 return;
             }
 
-            TextMeshProUGUI desc = __instance.CGet<TextMeshProUGUI>("Description");
-            if (desc != null)
-            {
-                desc.text = FourSetUiState.AppendSetHint(displayData.TemplateId, desc.text);
-            }
+            desc.text = FourSetUiState.AppendSetHint(displayData.TemplateId, desc.text);
         }
         catch (Exception ex)
         {

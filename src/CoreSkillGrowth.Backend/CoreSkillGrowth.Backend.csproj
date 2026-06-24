@@ -13,17 +13,19 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\dist\Plugins\</OutputPath>
     <DefineConstants>$(DefineConstants);BACKEND</DefineConstants>
-    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
+    <GameDir Condition="'$(GameDir)' == '' and '$(TAIWU_GAME_DIR)' != ''">$(TAIWU_GAME_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
     <BackendDir>$(GameDir)\Backend</BackendDir>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="BackendPlugin.cs" />
+    <Compile Include="CoreSkillBreakCompatibilityPatch.cs" />
+    <Compile Include="DecoupledCoreSkillEffectsPatch.cs" />
     <Compile Include="FourSetActiveSkillBonusPatch.cs" />
     <Compile Include="FourSetBonusPatch.cs" />
     <Compile Include="FourSetNormalAttackPowerPatch.cs" />
     <Compile Include="PeiRanAutoHealSpeedPatch.cs" />
-    <Compile Include="TaiZuComboAmplifyPatch.cs" />
     <Compile Include="..\CoreSkillGrowth.Shared\CoreSkillGrowthConfigPatch.cs" Link="CoreSkillGrowthConfigPatch.cs" />
   </ItemGroup>
 
@@ -46,6 +48,14 @@
     </Reference>
     <Reference Include="GameData.ArchiveData">
       <HintPath>$(BackendDir)\GameData.ArchiveData.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameData.Utilities.Structure">
+      <HintPath>$(BackendDir)\GameData.Utilities.Structure.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Redzen">
+      <HintPath>$(BackendDir)\Redzen.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="GameData">
