@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1.1
+
+- Restored Myriad-Devouring Blood-Rift Fist's flavor description.
+- Clarified the in-game Blood-Rift passive text so the base fist passive and four-piece set enhancements are separated correctly.
+- Updated the four-piece tooltip text to describe only the actual set enhancements: Normal Attack Power, bad-luck protection, and player-command priority.
+
 ## 1.0.1.0
 
 - Reworked Myriad-Devouring Blood-Rift Fist into an independent backend passive.

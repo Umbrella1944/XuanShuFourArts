@@ -168,11 +168,11 @@ internal static class CoreSkillGrowthConfigPatch
                 new[] { "后影潮复触发", "血隙层数流失", "血隙追击爆发" },
                 new[] { "Tide of Aftershadows triggers.", "Blood-Rift stack lost.", "Blood-Rift Pursuit releases." }),
             L(useEnglish,
-                new[] { "血隙层：每层使下一次血隙追击威力+200%，最多10层并持续整场战斗，进入伤害结算时消耗全部层数，若被中断则损失1层。血隙追击必中、必重创，无法被反震。" },
-                new[] { "Blood-Rift stacks: each stack increases the next Blood-Rift Pursuit's power by 200%, up to 10 stacks for the whole battle. All stacks are consumed on damage settlement; if interrupted, 1 stack is lost. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage." }),
+                new[] { "普通攻击命中后，有20%机率获得2层血隙，并触发1次血隙追击；每层血隙使血隙追击威力+200%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙，若被中断则损失1层。" },
+                new[] { "After a Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement; if interrupted, 1 stack is lost." }),
             L(useEnglish,
-                new[] { "此功法被动由玄枢四艺独立判定；普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击不会触发反震，进入伤害结算时消耗全部层数，若被中断则损失1层" },
-                new[] { "This passive is resolved by Four Arts of the Mystic Pivot's independent backend. When a Normal Attack hits, it has a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit does not trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack." }));
+                new[] { "普通攻击命中后，有20%机率获得2层血隙，并触发1次血隙追击；每层血隙使血隙追击威力+200%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙，若被中断则损失1层。" },
+                new[] { "After a Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement; if interrupted, 1 stack is lost." }));
     }
 
     private static void PatchPeiRanJue(bool useEnglish)
@@ -276,8 +276,8 @@ internal static class CoreSkillGrowthConfigPatch
 
         SetField(item, "Name", L(useEnglish, "万噬血隙拳", "Myriad-Devouring Blood-Rift Fist"));
         SetField(item, "Desc", L(useEnglish,
-            "万噬血隙拳本无定形，借拳为门。此被动由玄枢四艺独立判定；普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击不会触发反震，进入伤害结算时消耗全部层数，若被中断则损失1层。",
-            "Formless in truth, this fist is only a gate. Its passive is resolved by Four Arts of the Mystic Pivot's independent backend. When a Normal Attack hits, it has a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit does not trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack."));
+            "万噬血隙拳本无定形，借拳为门，纳兽为枢。其法既入身中，便不问掌指，不问锋刃，只候敌躯一线微裂；裂处方生，群凶已伏血下，前势如齿未离，后影如潮复至。追之愈久，噬之愈深，终使其形乱神离，不知所避。",
+            "Formless in truth, this fist is only a gate; the beast is what remains within. Hand, edge, or point; it waits for a rift in the foe. Once blood opens, hidden fangs gather; one bite has not left before the next shadow comes. The longer it hunts, the deeper it sinks."));
         SetField(item, "Grade", (sbyte)8);
         SetField(item, "DirectEffectID", (int)_taiZuDisplayEffectId);
         SetField(item, "ReverseEffectID", (int)_taiZuDisplayEffectId);

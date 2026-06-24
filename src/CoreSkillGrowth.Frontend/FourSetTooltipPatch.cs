@@ -90,15 +90,15 @@ internal static class FourSetUiState
         {
             title = $"Mystic Pivot Four Arts {displayCount}/4";
             desc = detailMode
-                ? "4-piece set effect\nFour Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\nBlood-Rift - Hairline Rift: Normal Attack Power +100%.\nBlood-Rift - Tide of Aftershadows: Normal Attack hits have a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit; each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit cannot trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack.\nReturning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\nShadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\nTwofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active."
-                : "4pc: Major combat attributes +15%.\nHold Alt for details.";
+                ? "4-piece set effect\nFour Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\nBlood-Rift - Hairline Rift: Normal Attack Power +100%.\nBlood-Rift - Tide of Aftershadows: After Blood-Rift trigger rolls fail 6 times in a row, bad-luck protection begins; each further failure increases trigger chance by 5%, up to 45%. Player commands take priority over Normal Attacks.\nReturning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\nShadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\nTwofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active."
+                : "4pc: Major combat attributes +15%; Normal Attack Power +100%.\nHold Alt for details.";
         }
         else
         {
             title = $"玄枢四诀 {displayCount}/4";
             desc = detailMode
-                ? "4件套装效果\n四诀共鸣：攻击、防御、命中、化解 +15%。\n万噬血隙·一线微裂：普通攻击威力 +100%。\n万噬血隙·后影潮复：普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击无法被反震，进入伤害结算时消耗全部层数，若被中断则损失1层。\n玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。"
-                : "4件：主战斗属性 +15%。\n按住 Alt 查看详细效果。";
+                ? "4件套装效果\n四诀共鸣：攻击、防御、命中、化解 +15%。\n万噬血隙·一线微裂：普通攻击威力 +100%。\n万噬血隙·后影潮复：血隙触发连续6次失败后开始获得防脸黑加成，每次失败使触发机率+5%，最高45%；玩家主动指令优先于普通攻击。\n玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。"
+                : "4件：主战斗属性 +15%；普通攻击威力 +100%。\n按住 Alt 查看详细效果。";
         }
 
         return
@@ -123,7 +123,7 @@ internal static class FourSetUiState
                 $"Progress: {displayCount}/4\n" +
                 "Four Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\n" +
                 "Blood-Rift - Hairline Rift: Normal Attack Power +100%.\n" +
-                "Blood-Rift - Tide of Aftershadows: Normal Attack hits have a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit; each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit cannot trigger bounce damage. It consumes all stacks on damage settlement; if interrupted, it loses 1 stack.\n" +
+                "Blood-Rift - Tide of Aftershadows: After Blood-Rift trigger rolls fail 6 times in a row, bad-luck protection begins; each further failure increases trigger chance by 5%, up to 45%. Player commands take priority over Normal Attacks.\n" +
                 "Returning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\n" +
                 "Shadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\n" +
                 "Twofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active.";
@@ -134,7 +134,7 @@ internal static class FourSetUiState
             $"当前进度：{displayCount}/4\n" +
             "四诀共鸣：攻击、防御、命中、化解 +15%。\n" +
             "万噬血隙·一线微裂：普通攻击威力 +100%。\n" +
-            "万噬血隙·后影潮复：普通攻击命中时，有20%机率获得2层血隙并触发1次必中、必重创的血隙追击；每层使血隙追击威力+200%，最多10层并持续整场战斗；血隙追击无法被反震，进入伤害结算时消耗全部层数，若被中断则损失1层。\n" +
+            "万噬血隙·后影潮复：血隙触发连续6次失败后开始获得防脸黑加成，每次失败使触发机率+5%，最高45%；玩家主动指令优先于普通攻击。\n" +
             "玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n" +
             "照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n" +
             "两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。";

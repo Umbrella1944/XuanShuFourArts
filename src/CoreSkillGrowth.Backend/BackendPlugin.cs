@@ -4,7 +4,7 @@ using TaiwuModdingLib.Core.Plugin;
 
 namespace XuanShuFourArts.Backend;
 
-[PluginConfig("XuanShuFourArtsBackend", "Umbrella", "1.0.1.0")]
+[PluginConfig("XuanShuFourArtsBackend", "Umbrella", "1.0.1.1")]
 public sealed class BackendPlugin : TaiwuRemakePlugin
 {
     private Harmony _harmony;
