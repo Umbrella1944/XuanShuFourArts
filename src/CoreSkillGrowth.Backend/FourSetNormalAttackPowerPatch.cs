@@ -19,6 +19,7 @@ internal sealed class BloodRiftCombatState
     public bool FreeAttackActive;
     public int FreeAttackSnapshotStacks;
     public bool FreeAttackDamageSettled;
+    public bool RollAttemptedInCurrentNormalAttack;
 
     public void ClearFreeAttack()
     {
@@ -27,15 +28,20 @@ internal sealed class BloodRiftCombatState
         FreeAttackSnapshotStacks = 0;
         FreeAttackDamageSettled = false;
     }
+
+    public void ResetNormalAttackRoll()
+    {
+        RollAttemptedInCurrentNormalAttack = false;
+    }
 }
 
 internal static class BloodRiftPursuitRuntime
 {
     private static readonly bool BloodRiftTestMode = false;
     private const int BaseChancePercent = 20;
-    private const int PityStartFailures = 6;
-    private const int PityStepPercent = 5;
-    private const int PityMaxChancePercent = 45;
+    private const int PityStartFailures = 4;
+    private const int PityStepPercent = 15;
+    private const int PityMaxChancePercent = 100;
     private const int FullSetNormalAttackPowerPercent = 200;
     private const int TriggerStacks = 2;
     private const int MaxStacks = 10;
@@ -52,13 +58,12 @@ internal static class BloodRiftPursuitRuntime
         DataContext context,
         CombatCharacter attacker,
         CombatCharacter defender,
-        int pursueIndex,
         bool hit,
         bool isFightBack)
     {
         try
         {
-            if (!CanRollPursuit(attacker, defender, pursueIndex, hit, isFightBack))
+            if (!CanRollPursuit(attacker, defender, hit, isFightBack))
             {
                 return;
             }
@@ -70,6 +75,12 @@ internal static class BloodRiftPursuitRuntime
                 return;
             }
 
+            if (state.RollAttemptedInCurrentNormalAttack)
+            {
+                return;
+            }
+
+            state.RollAttemptedInCurrentNormalAttack = true;
             bool fullSet = FourSetActiveSkillBonus.HasFullSetEquipped(charId);
             int chance = CalcChance(state, fullSet);
             if (!RollPercent(context, chance))
@@ -156,11 +167,13 @@ internal static class BloodRiftPursuitRuntime
 
                 SyncStackDisplay(context, attacker, state);
                 state.ClearFreeAttack();
+                state.ResetNormalAttackRoll();
                 return;
             }
 
             if (!state.PendingFreeAttack)
             {
+                state.ResetNormalAttackRoll();
                 return;
             }
 
@@ -170,9 +183,11 @@ internal static class BloodRiftPursuitRuntime
                 SyncStackDisplay(context, attacker, state);
                 ShowBloodRiftTip(attacker, 1);
                 state.ClearFreeAttack();
+                state.ResetNormalAttackRoll();
                 return;
             }
 
+            state.ResetNormalAttackRoll();
             attacker.NormalAttackFree();
         }
         catch (Exception ex)
@@ -327,7 +342,6 @@ internal static class BloodRiftPursuitRuntime
     private static bool CanRollPursuit(
         CombatCharacter attacker,
         CombatCharacter defender,
-        int pursueIndex,
         bool hit,
         bool isFightBack)
     {
@@ -335,7 +349,6 @@ internal static class BloodRiftPursuitRuntime
             defender == null ||
             !hit ||
             isFightBack ||
-            pursueIndex != 0 ||
             attacker.IsAutoNormalAttackingSpecial ||
             attacker.IsBreakAttacking ||
             !attacker.IsAlly ||
@@ -364,8 +377,15 @@ internal static class BloodRiftPursuitRuntime
         }
 
         Character owner = character.GetCharacter();
-        return owner != null &&
-            owner.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
+        if (owner == null ||
+            !owner.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan) ||
+            !CombatStates.TryGetValue(character.GetId(), out BloodRiftCombatState state))
+        {
+            return false;
+        }
+
+        return state.FreeAttackActive &&
+            state.FreeAttackSnapshotStacks > 0;
     }
 
     private static bool CanStartFreeAttack(CombatCharacter character)
@@ -506,7 +526,6 @@ internal static class BloodRiftNormalAttackEndPatch
             context,
             attacker,
             defender,
-            pursueIndex,
             hit,
             isFightBack);
     }

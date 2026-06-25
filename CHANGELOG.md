@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.1.5
+
+- Fixed Blood-Rift pursuit control incorrectly suppressing vanilla/weapon pursuit whenever Myriad-Devouring Blood-Rift Fist was equipped.
+- Vanilla pursuit is now only suppressed during the Blood-Rift Pursuit free attack itself.
+
+## 1.0.1.4
+
+- Updated supported game version to 1.0.29.
+- Improved Blood-Rift trigger compatibility with Normal Attack chains across weapon types.
+- Changed the Blood-Rift four-piece assurance to begin after 4 failed triggers, gain +15% trigger chance per further failure, and cap at 100%.
+- Raised the four arts' secondary Practice Effect attributes from 30% to 40%.
+- Lowered Myriad-Devouring Blood-Rift Fist's active casting power while keeping its original two-step injury structure.
+
+## 1.0.1.2
+
+- Improved Blood-Rift Normal Attack trigger compatibility across weapon attack chains.
+- Blood-Rift now rolls at most once per Normal Attack sequence, while no longer requiring `pursueIndex == 0`.
+
 ## 1.0.1.1
 
 - Restored Myriad-Devouring Blood-Rift Fist's flavor description.

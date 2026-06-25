@@ -8,8 +8,8 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 
 ## Current Release
 
-- Mod version: `1.0.1.1`
-- Supported game version: `1.0.24`
+- Mod version: `1.0.1.5`
+- Supported game version: `1.0.29`
 - Workshop FileId: `3747599301`
 - Author: `Umbrella`
 

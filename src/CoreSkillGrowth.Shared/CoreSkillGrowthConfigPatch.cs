@@ -197,10 +197,10 @@ internal static class CoreSkillGrowthConfigPatch
             (17, 100),
             (9, 100),
             (15, 100),
-            (27, 30),
-            (26, 30),
-            (22, 30),
-            (19, 30),
+            (27, 40),
+            (26, 40),
+            (22, 40),
+            (19, 40),
             (28, 100),
             (29, 100),
             (30, 100),
@@ -232,8 +232,8 @@ internal static class CoreSkillGrowthConfigPatch
             (10, 100),
             (8, 100),
             (14, 100),
-            (25, 30),
-            (20, 30)));
+            (25, 40),
+            (20, 40)));
         SetField(item, "OuterDamageSteps", new int[] { 0, 0, 0, 0, 0, 100, 100 });
         SetField(item, "InnerDamageSteps", new int[] { 0, 0, 0, 0, 0, 100, 100 });
     }
@@ -264,8 +264,8 @@ internal static class CoreSkillGrowthConfigPatch
             (16, 100),
             (12, 100),
             (13, 100),
-            (21, 30),
-            (23, 30)));
+            (21, 40),
+            (23, 40)));
         SetField(item, "OuterDamageSteps", new int[] { 200, 200, 0, 0, 0, 0, 0 });
         SetField(item, "InnerDamageSteps", new int[] { 200, 200, 0, 0, 0, 0, 0 });
     }
@@ -284,7 +284,7 @@ internal static class CoreSkillGrowthConfigPatch
         SetField(item, "PrepareTotalProgress", 12000);
         SetField(item, "BreathStanceTotalCost", (sbyte)80);
         SetField(item, "BaseInnerRatio", (sbyte)50);
-        SetField(item, "Penetrate", (short)620);
+        SetField(item, "Penetrate", (short)420);
         SetField(item, "DistanceAdditionWhenCast", (short)20);
         SetField(item, "TotalHit", (short)140);
         SetField(item, "TrickCost", new List<NeedTrick> { new NeedTrick(6, 1), new NeedTrick(8, 1) });
@@ -292,8 +292,8 @@ internal static class CoreSkillGrowthConfigPatch
             (11, 100),
             (6, 100),
             (7, 100),
-            (18, 30),
-            (24, 30)));
+            (18, 40),
+            (24, 40)));
         SetField(item, "OuterDamageSteps", new int[] { 0, 0, 0, 100, 100, 0, 0 });
         SetField(item, "InnerDamageSteps", new int[] { 0, 0, 0, 100, 100, 0, 0 });
     }

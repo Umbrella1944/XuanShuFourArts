@@ -2,8 +2,8 @@ return {
     Title = "Four Arts of the Mystic Pivot",
     Source = 0,
     FileId = 3747599301,
-    Version = "1.0.1.1",
-    GameVersion = "1.0.24",
+    Version = "1.0.1.5",
+    GameVersion = "1.0.29",
     BackendPlugins = {
         [1] = "XuanShuFourArtsB.dll",
     },
@@ -15,8 +15,8 @@ return {
 
 Author: Umbrella
 Game: The Scroll of Taiwu
-Mod Version: 1.0.1.1
-Supported Game Version: 1.0.24
+Mod Version: 1.0.1.5
+Supported Game Version: 1.0.29
 
 1. Overview
 
@@ -37,14 +37,14 @@ Added the Four Arts set bonus system.
 When all four arts are equipped for Practice, the set bonus provides:
 - Major combat attributes +15%.
 - Normal Attack power +100%.
-- Blood-Rift gains trigger assurance under the four-piece set: after Blood-Rift fails to trigger 6 times in a row, each further failure increases trigger chance by 5%, up to 45%.
+- Blood-Rift gains trigger assurance under the four-piece set: after Blood-Rift fails to trigger 4 times in a row, each further failure increases trigger chance by 15%, up to 100%.
 - The practitioner's skill, defense, footwork, item, and other explicit commands take priority over Normal Attacks while the four-piece set is active.
 - Profound Breath Returning-Frame Sutra's Inner Art passive recovery is improved from 1 active tick per 10 auto-heal updates to 1 active tick per 7 auto-heal updates.
 - Shadow-Reflecting Wandering Step's active Movement Speed effect +40%.
 - Yin-Yang Form-Restoring Art's active defensive bonuses +40%.
 
 Added an in-game set bonus tooltip. Hold Alt to view detailed set bonus information.
-Reduced the four arts' secondary Practice Effect attributes to the 30% tier.
+The four arts' secondary Practice Effect attributes are set to the 40% tier.
 
 3. Four Arts
 
@@ -74,7 +74,7 @@ Original Art: Emperor Long Fist
 Type: Fist Arts / Annihilation
 Role: hidden follow-up attack, passive pressure core
 
-This passive is resolved by the mod's independent backend rather than a vanilla SpecialEffect shell. When the practitioner's Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit. Each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit consumes all stacks on damage settlement, does not trigger bounce damage, and loses 1 stack if interrupted. Normal Attacks still trigger bounce damage normally. The four-piece set also grants Normal Attack power +100% and trigger assurance: after Blood-Rift fails to trigger 6 times in a row, each further failure increases trigger chance by 5%, up to 45%.
+This passive is resolved by the mod's independent backend rather than a vanilla SpecialEffect shell. When the practitioner's Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 forced-hit, guaranteed-critical Blood-Rift Pursuit. Each stack increases pursuit power by 200%, up to 10 stacks for the battle. Blood-Rift Pursuit consumes all stacks on damage settlement, does not trigger bounce damage, and loses 1 stack if interrupted. Normal Attacks still trigger bounce damage normally. The four-piece set also grants Normal Attack power +100% and trigger assurance: after Blood-Rift fails to trigger 4 times in a row, each further failure increases trigger chance by 15%, up to 100%.
 
 4. Notes
 
