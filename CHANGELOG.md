@@ -4,15 +4,15 @@
 
 - Restored Myriad-Devouring Blood-Rift Fist's flavor description.
 - Clarified the in-game Blood-Rift passive text so the base fist passive and four-piece set enhancements are separated correctly.
-- Updated the four-piece tooltip text to describe only the actual set enhancements: Normal Attack Power, bad-luck protection, and player-command priority.
+- Updated the four-piece tooltip text to describe only the actual set enhancements: Normal Attack Power, trigger assurance, and practitioner-command priority.
 
 ## 1.0.1.0
 
 - Reworked Myriad-Devouring Blood-Rift Fist into an independent backend passive.
 - Added Blood-Rift stacks: each stack increases the next Blood-Rift Pursuit's power by 200%, up to 10 stacks for the whole battle.
 - Blood-Rift Pursuit now always hits, always crits, and cannot trigger bounce damage. Normal Attacks still trigger bounce damage normally.
-- Added four-piece bad-luck protection for Blood-Rift: after repeated failed trigger rolls, trigger chance gradually increases up to 45%.
-- Added player-command priority over Normal Attacks while the four-piece set is active.
+- Added four-piece trigger assurance for Blood-Rift: after repeated failed triggers, trigger chance gradually increases up to 45%.
+- Added practitioner-command priority over Normal Attacks while the four-piece set is active.
 - Adjusted four-piece set values:
   - Four Arts Resonance reduced from 20% to 15%.
   - Blood-Rift Pursuit power per stack reduced from 300% to 200%.
