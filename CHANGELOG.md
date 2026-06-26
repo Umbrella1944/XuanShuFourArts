@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.1.8
+
+- Added a Normal Attack eligibility ticket for Blood-Rift triggering.
+- Blood-Rift can now only roll from a legitimate player Normal Attack sequence, preventing free-attack or pursuit event tails from retriggering the passive repeatedly.
+- Reduced Blood-Rift Pursuit power per stack from 200% to 150%.
+
+## 1.0.1.7
+
+- Fixed Blood-Rift Pursuit sometimes resolving as only a single follow-up hit.
+- Blood-Rift Pursuit now follows the vanilla Normal Attack pursuit chain during its own free attack, while keeping the original safety gates for fallen characters, phase changes, fight-back states, and pursuit-forbid effects.
+
+## 1.0.1.6
+
+- Removed the four-piece command-priority override so vanilla Normal Attack chains keep their original priority, visuals, and damage flow.
+- Blood-Rift now rolls once after a complete Normal Attack sequence resolves, as long as at least one hit landed during that sequence.
+- Updated Blood-Rift and four-piece descriptions to match the current behavior.
+
 ## 1.0.1.5
 
 - Fixed Blood-Rift pursuit control incorrectly suppressing vanilla/weapon pursuit whenever Myriad-Devouring Blood-Rift Fist was equipped.

@@ -8,7 +8,7 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 
 ## Current Release
 
-- Mod version: `1.0.1.5`
+- Mod version: `1.0.1.8`
 - Supported game version: `1.0.29`
 - Workshop FileId: `3747599301`
 - Author: `Umbrella`
@@ -19,8 +19,7 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 - Keeps low-tier learning, usage, and breakthrough burden for these four arts.
 - Adds a four-piece set bonus when all four arts are equipped for Practice.
 - Uses independent empty effect shells plus backend patches for the four core passives, avoiding changes to the original vanilla effect entries.
-- Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: Normal Attack hits can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
-- Gives player commands priority over Normal Attacks while the four-piece set is active.
+- Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: a complete Normal Attack sequence that lands at least once can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
 - Adds in-game set tooltip support with Alt details, while suppressing the large set tooltip during combat.
 - Supports Chinese and English in-game text at game startup.
 
@@ -70,17 +69,20 @@ dist/Plugins/
 1. Update `dist/Config.Lua`:
    - top-level `Version`
    - top-level `GameVersion`
-   - `Description` metadata lines for mod version and supported game version
-   - version heading in the description when needed
-2. Keep `DetailImageList = { }` unless the workshop detail-image order intentionally needs to be replaced.
-3. Build both projects.
-4. Sync `dist/Config.Lua`, `dist/Settings.Lua`, `dist/Plugins/`, and required image assets to:
+   - version fields inside the preserved workshop description text
+2. Preserve workshop-facing metadata:
+   - Read the current English Steam Workshop page before editing `Title` or `Description`.
+   - Keep the default workshop metadata in English.
+   - Do not replace the default English `Title` or `Description` with the Simplified Chinese page text.
+3. Keep `DetailImageList = { }` unless the workshop detail-image order intentionally needs to be replaced.
+4. Build both projects.
+5. Sync `dist/Config.Lua`, `dist/Settings.Lua`, `dist/Plugins/`, and required image assets to:
 
 ```text
 C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu\Mod\XuanShuFourArts
 ```
 
-5. Upload through the in-game mod manager.
+6. Upload through the in-game mod manager.
 
 ## Compatibility Notes
 

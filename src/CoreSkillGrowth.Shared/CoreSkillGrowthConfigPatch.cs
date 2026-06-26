@@ -168,11 +168,11 @@ internal static class CoreSkillGrowthConfigPatch
                 new[] { "后影潮复触发", "血隙层数流失", "血隙追击爆发" },
                 new[] { "Tide of Aftershadows triggers.", "Blood-Rift stack lost.", "Blood-Rift Pursuit releases." }),
             L(useEnglish,
-                new[] { "普通攻击命中后，有20%机率获得2层血隙，并触发1次血隙追击；每层血隙使血隙追击威力+200%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙，若被中断则损失1层。" },
-                new[] { "After a Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement; if interrupted, 1 stack is lost." }),
+                new[] { "完整普通攻击结算后，若本轮普通攻击至少命中1次，有20%机率获得2层血隙并触发1次血隙追击；每层血隙使血隙追击威力+150%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙。" },
+                new[] { "After a complete Normal Attack resolves, if at least one hit landed, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 150%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement." }),
             L(useEnglish,
-                new[] { "普通攻击命中后，有20%机率获得2层血隙，并触发1次血隙追击；每层血隙使血隙追击威力+200%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙，若被中断则损失1层。" },
-                new[] { "After a Normal Attack hits, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 200%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement; if interrupted, 1 stack is lost." }));
+                new[] { "完整普通攻击结算后，若本轮普通攻击至少命中1次，有20%机率获得2层血隙并触发1次血隙追击；每层血隙使血隙追击威力+150%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙。" },
+                new[] { "After a complete Normal Attack resolves, if at least one hit landed, there is a 20% chance to gain 2 Blood-Rift stacks and trigger 1 Blood-Rift Pursuit. Each stack increases Blood-Rift Pursuit power by 150%, up to 10 stacks for the whole battle. Blood-Rift Pursuit always hits, always crits, and cannot trigger bounce damage. All Blood-Rift stacks are consumed on damage settlement." }));
     }
 
     private static void PatchPeiRanJue(bool useEnglish)

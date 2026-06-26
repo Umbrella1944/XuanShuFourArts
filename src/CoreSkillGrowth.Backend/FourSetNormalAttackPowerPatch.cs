@@ -19,7 +19,8 @@ internal sealed class BloodRiftCombatState
     public bool FreeAttackActive;
     public int FreeAttackSnapshotStacks;
     public bool FreeAttackDamageSettled;
-    public bool RollAttemptedInCurrentNormalAttack;
+    public bool NormalAttackRollEligible;
+    public bool CurrentNormalAttackHit;
 
     public void ClearFreeAttack()
     {
@@ -29,9 +30,10 @@ internal sealed class BloodRiftCombatState
         FreeAttackDamageSettled = false;
     }
 
-    public void ResetNormalAttackRoll()
+    public void ResetNormalAttackRecord()
     {
-        RollAttemptedInCurrentNormalAttack = false;
+        NormalAttackRollEligible = false;
+        CurrentNormalAttackHit = false;
     }
 }
 
@@ -45,13 +47,53 @@ internal static class BloodRiftPursuitRuntime
     private const int FullSetNormalAttackPowerPercent = 200;
     private const int TriggerStacks = 2;
     private const int MaxStacks = 10;
-    private const int PursuitPowerPercentPerStack = 200;
+    private const int PursuitPowerPercentPerStack = 150;
 
     private static readonly Dictionary<int, BloodRiftCombatState> CombatStates = new Dictionary<int, BloodRiftCombatState>();
 
     internal static void ClearAll()
     {
         CombatStates.Clear();
+    }
+
+    internal static void OnNormalAttackBegin(
+        DataContext context,
+        CombatCharacter attacker)
+    {
+        try
+        {
+            if (attacker == null ||
+                !CombatStates.TryGetValue(attacker.GetId(), out BloodRiftCombatState state) ||
+                !state.PendingFreeAttack)
+            {
+                return;
+            }
+
+            if (!CanStartFreeAttack(attacker))
+            {
+                LoseStack(state);
+                SyncStackDisplay(context, attacker, state);
+                ShowBloodRiftTip(attacker, 1);
+                state.ClearFreeAttack();
+                state.ResetNormalAttackRecord();
+                return;
+            }
+
+            state.PendingFreeAttack = false;
+            state.FreeAttackActive = true;
+            state.FreeAttackSnapshotStacks = Math.Max(state.Stacks, 0);
+            state.FreeAttackDamageSettled = false;
+            state.CurrentNormalAttackHit = false;
+            if (state.FreeAttackSnapshotStacks <= 0)
+            {
+                SyncStackDisplay(context, attacker, state);
+                state.ClearFreeAttack();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit begin failed: {ex}");
+        }
     }
 
     internal static void OnNormalAttackEnd(
@@ -68,43 +110,19 @@ internal static class BloodRiftPursuitRuntime
                 return;
             }
 
-            int charId = attacker.GetId();
-            BloodRiftCombatState state = GetCombatState(charId);
-            if (state.PendingFreeAttack || state.FreeAttackActive)
+            if (!CombatStates.TryGetValue(attacker.GetId(), out BloodRiftCombatState state) ||
+                !state.NormalAttackRollEligible ||
+                state.PendingFreeAttack ||
+                state.FreeAttackActive)
             {
                 return;
             }
 
-            if (state.RollAttemptedInCurrentNormalAttack)
-            {
-                return;
-            }
-
-            state.RollAttemptedInCurrentNormalAttack = true;
-            bool fullSet = FourSetActiveSkillBonus.HasFullSetEquipped(charId);
-            int chance = CalcChance(state, fullSet);
-            if (!RollPercent(context, chance))
-            {
-                if (fullSet)
-                {
-                    state.FailureCount++;
-                }
-
-                return;
-            }
-
-            state.FailureCount = 0;
-            state.Stacks = Math.Min(MaxStacks, state.Stacks + TriggerStacks);
-            state.PendingFreeAttack = true;
-            state.FreeAttackActive = false;
-            state.FreeAttackSnapshotStacks = 0;
-            state.FreeAttackDamageSettled = false;
-            SyncStackDisplay(context, attacker, state);
-            ShowBloodRiftTip(attacker, 0);
+            state.CurrentNormalAttackHit = true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit trigger failed: {ex}");
+            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit hit record failed: {ex}");
         }
     }
 
@@ -112,38 +130,29 @@ internal static class BloodRiftPursuitRuntime
     {
         try
         {
-            if (!CombatStates.TryGetValue(charId, out BloodRiftCombatState state) ||
-                !state.PendingFreeAttack)
+            if (CombatStates.TryGetValue(charId, out BloodRiftCombatState existingState) &&
+                (existingState.PendingFreeAttack || existingState.FreeAttackActive))
             {
                 return;
             }
 
             CombatCharacter combatChar = DomainManager.Combat.GetElement_CombatCharacterDict(charId);
-            if (combatChar == null || HasPursuitInterruptCommand(combatChar))
+            if (CanCreateNormalAttackTicket(combatChar))
             {
-                LoseStack(state);
-                SyncStackDisplay(context, combatChar, state);
-                ShowBloodRiftTip(combatChar, 1);
-                state.ClearFreeAttack();
+                BloodRiftCombatState state = GetCombatState(charId);
+                state.ResetNormalAttackRecord();
+                state.NormalAttackRollEligible = true;
                 return;
             }
 
-            state.PendingFreeAttack = false;
-            state.FreeAttackActive = true;
-            state.FreeAttackSnapshotStacks = Math.Max(state.Stacks, 0);
-            state.FreeAttackDamageSettled = false;
-            if (state.FreeAttackSnapshotStacks <= 0)
+            if (existingState != null)
             {
-                SyncStackDisplay(context, combatChar, state);
-                state.ClearFreeAttack();
-                return;
+                existingState.ResetNormalAttackRecord();
             }
-
-            combatChar.AttackForceHitCount++;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit prepare failed: {ex}");
+            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit record reset failed: {ex}");
         }
     }
 
@@ -167,27 +176,53 @@ internal static class BloodRiftPursuitRuntime
 
                 SyncStackDisplay(context, attacker, state);
                 state.ClearFreeAttack();
-                state.ResetNormalAttackRoll();
+                state.ResetNormalAttackRecord();
                 return;
             }
 
-            if (!state.PendingFreeAttack)
+            if (!state.NormalAttackRollEligible)
             {
-                state.ResetNormalAttackRoll();
+                state.ResetNormalAttackRecord();
                 return;
             }
 
-            if (HasPursuitInterruptCommand(attacker) || !CanStartFreeAttack(attacker))
+            if (!state.CurrentNormalAttackHit)
+            {
+                state.ResetNormalAttackRecord();
+                return;
+            }
+
+            state.ResetNormalAttackRecord();
+            bool fullSet = FourSetActiveSkillBonus.HasFullSetEquipped(attacker.GetId());
+            int chance = CalcChance(state, fullSet);
+            if (!RollPercent(context, chance))
+            {
+                if (fullSet)
+                {
+                    state.FailureCount++;
+                }
+
+                return;
+            }
+
+            state.FailureCount = 0;
+            state.Stacks = Math.Min(MaxStacks, state.Stacks + TriggerStacks);
+            state.PendingFreeAttack = true;
+            state.FreeAttackActive = false;
+            state.FreeAttackSnapshotStacks = 0;
+            state.FreeAttackDamageSettled = false;
+            SyncStackDisplay(context, attacker, state);
+            ShowBloodRiftTip(attacker, 0);
+
+            if (!CanStartFreeAttack(attacker))
             {
                 LoseStack(state);
                 SyncStackDisplay(context, attacker, state);
                 ShowBloodRiftTip(attacker, 1);
                 state.ClearFreeAttack();
-                state.ResetNormalAttackRoll();
                 return;
             }
 
-            state.ResetNormalAttackRoll();
             attacker.NormalAttackFree();
         }
         catch (Exception ex)
@@ -196,10 +231,18 @@ internal static class BloodRiftPursuitRuntime
         }
     }
 
-    internal static bool TrySuppressVanillaPursuit(CombatCharacter character, out bool result)
+    internal static bool ShouldForceBloodRiftPursuitHit(CombatCharacter attacker, short skillId)
     {
-        result = false;
-        return ShouldControlPursuit(character);
+        if (skillId >= 0 ||
+            attacker == null ||
+            attacker.GetIsFightBack() ||
+            !CombatStates.TryGetValue(attacker.GetId(), out BloodRiftCombatState state))
+        {
+            return false;
+        }
+
+        return state.FreeAttackActive &&
+            state.FreeAttackSnapshotStacks > 0;
     }
 
     internal static bool IsBloodRiftPursuitNormalAttack(CombatContext context)
@@ -209,6 +252,14 @@ internal static class BloodRiftPursuitRuntime
             context.IsNormalAttack &&
             !context.IsFightBack &&
             CombatStates.TryGetValue(attacker.GetId(), out BloodRiftCombatState state) &&
+            state.FreeAttackActive &&
+            state.FreeAttackSnapshotStacks > 0;
+    }
+
+    internal static bool IsBloodRiftPursuitCharacter(CombatCharacter character)
+    {
+        return character != null &&
+            CombatStates.TryGetValue(character.GetId(), out BloodRiftCombatState state) &&
             state.FreeAttackActive &&
             state.FreeAttackSnapshotStacks > 0;
     }
@@ -262,83 +313,6 @@ internal static class BloodRiftPursuitRuntime
         }
     }
 
-    internal static bool HasHigherPriorityCommand(CombatCharacter combatChar)
-    {
-        if (combatChar == null)
-        {
-            return false;
-        }
-
-        return HasPendingSkill(combatChar) ||
-            combatChar.NeedShowChangeTrick ||
-            combatChar.GetPreparingOtherAction() >= 0 ||
-            combatChar.NeedUseOtherAction != -1 ||
-            combatChar.NeedForceFlee ||
-            combatChar.NeedUseItem.IsValid() ||
-            combatChar.GetPreparingItem().IsValid() ||
-            combatChar.NeedPauseJumpMove ||
-            combatChar.NeedEnterSpecialShow ||
-            combatChar.PreparingOrDoingTeammateCommand();
-    }
-
-    internal static bool HasPendingSkill(CombatCharacter combatChar)
-    {
-        return combatChar.GetPreparingSkillId() >= 0 ||
-            combatChar.NeedUseSkillFreeId >= 0 ||
-            (combatChar.NeedUseSkillId >= 0 &&
-                (combatChar.GetAffectingDefendSkillId() < 0 ||
-                    DomainManager.SpecialEffect.ModifyData(
-                        combatChar.GetId(),
-                        combatChar.NeedUseSkillId,
-                        223,
-                        false)));
-    }
-
-    internal static bool HasPursuitInterruptCommand(CombatCharacter combatChar)
-    {
-        if (combatChar == null)
-        {
-            return false;
-        }
-
-        return HasQueuedSkillCommand(combatChar) ||
-            combatChar.NeedShowChangeTrick ||
-            combatChar.NeedUseOtherAction != -1 ||
-            combatChar.NeedForceFlee ||
-            combatChar.NeedUseItem.IsValid() ||
-            combatChar.NeedPauseJumpMove ||
-            combatChar.NeedEnterSpecialShow ||
-            combatChar.PreparingOrDoingTeammateCommand();
-    }
-
-    internal static void CancelPendingFreeAttackForCommand(CombatCharacter combatChar)
-    {
-        if (combatChar == null ||
-            !CombatStates.TryGetValue(combatChar.GetId(), out BloodRiftCombatState state) ||
-            !state.PendingFreeAttack ||
-            !HasPursuitInterruptCommand(combatChar))
-        {
-            return;
-        }
-
-        LoseStack(state);
-        SyncStackDisplay(DataContextManager.GetCurrentThreadDataContext(), combatChar, state);
-        ShowBloodRiftTip(combatChar, 1);
-        state.ClearFreeAttack();
-    }
-
-    private static bool HasQueuedSkillCommand(CombatCharacter combatChar)
-    {
-        return combatChar.NeedUseSkillFreeId >= 0 ||
-            (combatChar.NeedUseSkillId >= 0 &&
-                (combatChar.GetAffectingDefendSkillId() < 0 ||
-                    DomainManager.SpecialEffect.ModifyData(
-                        combatChar.GetId(),
-                        combatChar.NeedUseSkillId,
-                        223,
-                        false)));
-    }
-
     private static bool CanRollPursuit(
         CombatCharacter attacker,
         CombatCharacter defender,
@@ -363,31 +337,6 @@ internal static class BloodRiftPursuitRuntime
             character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
     }
 
-    private static bool ShouldControlPursuit(CombatCharacter character)
-    {
-        if (character == null ||
-            character.IsAutoNormalAttackingSpecial ||
-            character.IsBreakAttacking ||
-            character.GetIsFightBack() ||
-            !character.IsAlly ||
-            !DomainManager.Combat.IsMainCharacter(character) ||
-            !DomainManager.Combat.IsInCombat())
-        {
-            return false;
-        }
-
-        Character owner = character.GetCharacter();
-        if (owner == null ||
-            !owner.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan) ||
-            !CombatStates.TryGetValue(character.GetId(), out BloodRiftCombatState state))
-        {
-            return false;
-        }
-
-        return state.FreeAttackActive &&
-            state.FreeAttackSnapshotStacks > 0;
-    }
-
     private static bool CanStartFreeAttack(CombatCharacter character)
     {
         CombatCharacter defender = DomainManager.Combat.GetCombatCharacter(!character.IsAlly, tryGetCoverCharacter: true);
@@ -400,6 +349,25 @@ internal static class BloodRiftPursuitRuntime
             !defender.NeedChangeBossPhase &&
             !DomainManager.Combat.IsCharacterFallen(defender) &&
             !DomainManager.Combat.IsCharacterFallen(character);
+    }
+
+    private static bool CanCreateNormalAttackTicket(CombatCharacter combatChar)
+    {
+        if (combatChar == null ||
+            !DomainManager.Combat.IsInCombat() ||
+            !combatChar.IsAlly ||
+            !DomainManager.Combat.IsMainCharacter(combatChar) ||
+            combatChar.GetIsFightBack() ||
+            combatChar.IsBreakAttacking ||
+            combatChar.IsAutoNormalAttacking ||
+            combatChar.IsAutoNormalAttackingSpecial)
+        {
+            return false;
+        }
+
+        Character character = combatChar.GetCharacter();
+        return character != null &&
+            character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
     }
 
     private static BloodRiftCombatState GetCombatState(int charId)
@@ -531,11 +499,26 @@ internal static class BloodRiftNormalAttackEndPatch
     }
 }
 
+[HarmonyPatch(typeof(Events), "RaiseNormalAttackBegin")]
+internal static class BloodRiftNormalAttackBeginPatch
+{
+    [HarmonyPostfix]
+    private static void StartBloodRiftFreeAttack(
+        DataContext context,
+        CombatCharacter attacker,
+        CombatCharacter defender,
+        sbyte trickType,
+        int pursueIndex)
+    {
+        BloodRiftPursuitRuntime.OnNormalAttackBegin(context, attacker);
+    }
+}
+
 [HarmonyPatch(typeof(Events), "RaiseNormalAttackPrepareEnd")]
 internal static class BloodRiftNormalAttackPrepareEndPatch
 {
     [HarmonyPostfix]
-    private static void StartBloodRiftFreeAttack(DataContext context, int charId, bool isAlly)
+    private static void ResetBloodRiftNormalAttackRecord(DataContext context, int charId, bool isAlly)
     {
         BloodRiftPursuitRuntime.OnNormalAttackPrepareEnd(context, charId);
     }
@@ -554,22 +537,6 @@ internal static class BloodRiftNormalAttackAllEndPatch
     }
 }
 
-[HarmonyPatch(typeof(CombatDomain), "CanPursue")]
-internal static class BloodRiftCanPursuePatch
-{
-    [HarmonyPrefix]
-    private static bool SuppressVanillaPursuit(CombatCharacter character, bool critical, ref bool __result)
-    {
-        if (!BloodRiftPursuitRuntime.TrySuppressVanillaPursuit(character, out bool result))
-        {
-            return true;
-        }
-
-        __result = result;
-        return false;
-    }
-}
-
 [HarmonyPatch(typeof(CombatDomain), "AddBounceDamage", new[] { typeof(CombatContext), typeof(sbyte) })]
 internal static class BloodRiftNormalAttackBouncePatch
 {
@@ -577,6 +544,65 @@ internal static class BloodRiftNormalAttackBouncePatch
     private static bool DisableBloodRiftPursuitBounce(CombatContext context)
     {
         return !BloodRiftPursuitRuntime.IsBloodRiftPursuitNormalAttack(context);
+    }
+}
+
+[HarmonyPatch(typeof(CombatDomain), "CanPursue")]
+internal static class BloodRiftCanPursuePatch
+{
+    private static readonly FieldInfo SaveDyingEffectTriggeredField =
+        AccessTools.Field(typeof(CombatDomain), "_saveDyingEffectTriggerd");
+
+    [HarmonyPrefix]
+    private static bool ForceFullBloodRiftPursuit(CombatDomain __instance, CombatCharacter character, ref bool __result)
+    {
+        if (!BloodRiftPursuitRuntime.IsBloodRiftPursuitCharacter(character))
+        {
+            return true;
+        }
+
+        try
+        {
+            __result = CanSafelyPursue(__instance, character);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursue patch failed: {ex}");
+            return true;
+        }
+    }
+
+    private static bool CanSafelyPursue(CombatDomain combatDomain, CombatCharacter character)
+    {
+        if (combatDomain == null ||
+            character == null ||
+            !combatDomain.IsInCombat() ||
+            !DomainManager.SpecialEffect.ModifyData(character.GetId(), -1, 252, dataValue: true))
+        {
+            return false;
+        }
+
+        CombatCharacter defender = combatDomain.GetCombatCharacter(!character.IsAlly, tryGetCoverCharacter: true);
+        return defender != null &&
+            character.PursueAttackCount < 5 &&
+            !character.GetIsFightBack() &&
+            !defender.GetIsFightBack() &&
+            defender.ChangeCharId < 0 &&
+            character.ChangeCharId < 0 &&
+            !defender.NeedChangeBossPhase &&
+            !combatDomain.IsCharacterFallen(defender) &&
+            !combatDomain.IsCharacterFallen(character) &&
+            !IsSaveDyingEffectTriggered(combatDomain) &&
+            character.AttackForceHitCount <= 0 &&
+            character.AttackForceMissCount <= 0;
+    }
+
+    private static bool IsSaveDyingEffectTriggered(CombatDomain combatDomain)
+    {
+        return SaveDyingEffectTriggeredField != null &&
+            SaveDyingEffectTriggeredField.GetValue(combatDomain) is bool triggered &&
+            triggered;
     }
 }
 
@@ -593,6 +619,48 @@ internal static class BloodRiftPursuitCriticalPatch
 
         __result = true;
         return false;
+    }
+}
+
+[HarmonyPatch]
+internal static class BloodRiftPursuitHitPatch
+{
+    [HarmonyTargetMethod]
+    private static MethodBase TargetMethod()
+    {
+        return AccessTools.Method(
+            typeof(CombatDomain),
+            "ApplyHitOddsSpecialEffect",
+            new[]
+            {
+                typeof(CombatCharacter),
+                typeof(CombatCharacter),
+                typeof(int),
+                typeof(sbyte),
+                typeof(short)
+            });
+    }
+
+    [HarmonyPrepare]
+    private static bool Prepare()
+    {
+        MethodBase target = TargetMethod();
+        if (target != null)
+        {
+            return true;
+        }
+
+        Console.WriteLine("[XuanShuFourArts] Blood-Rift hit patch skipped: ApplyHitOddsSpecialEffect target not found.");
+        return false;
+    }
+
+    [HarmonyPostfix]
+    private static void ForceBloodRiftPursuitHit(CombatCharacter attacker, short skillId, ref int __result)
+    {
+        if (BloodRiftPursuitRuntime.ShouldForceBloodRiftPursuitHit(attacker, skillId))
+        {
+            __result = -1;
+        }
     }
 }
 
@@ -639,76 +707,5 @@ internal static class BloodRiftNormalAttackPowerPatch
         }
 
         BloodRiftPursuitRuntime.AmplifyBloodRiftPursuitPower(context, ref power);
-    }
-}
-
-[HarmonyPatch(typeof(CombatCharacterStateMachine), "GetProperState")]
-internal static class FourSetCommandPriorityPatch
-{
-    private static readonly FieldInfo CombatCharField =
-        AccessTools.Field(typeof(CombatCharacterStateMachine), "_combatChar");
-
-    [HarmonyPostfix]
-    private static void PrioritizePlayerCommands(CombatCharacterStateMachine __instance, ref CombatCharacterStateType __result)
-    {
-        try
-        {
-            if (__result != CombatCharacterStateType.PrepareAttack)
-            {
-                return;
-            }
-
-            CombatCharacter combatChar = CombatCharField.GetValue(__instance) as CombatCharacter;
-            if (combatChar == null ||
-                !combatChar.IsAlly ||
-                !DomainManager.Combat.IsMainCharacter(combatChar) ||
-                !FourSetActiveSkillBonus.HasFullSetEquipped(combatChar.GetId()))
-            {
-                return;
-            }
-
-            BloodRiftPursuitRuntime.CancelPendingFreeAttackForCommand(combatChar);
-
-            if (BloodRiftPursuitRuntime.HasPendingSkill(combatChar))
-            {
-                __result = CombatCharacterStateType.PrepareSkill;
-                return;
-            }
-
-            if (combatChar.NeedShowChangeTrick && !combatChar.PreparingOrDoingTeammateCommand())
-            {
-                __result = CombatCharacterStateType.SelectChangeTrick;
-                return;
-            }
-
-            if (combatChar.GetPreparingOtherAction() >= 0 ||
-                combatChar.NeedUseOtherAction != -1 ||
-                combatChar.NeedForceFlee)
-            {
-                __result = CombatCharacterStateType.PrepareOtherAction;
-                return;
-            }
-
-            if (combatChar.NeedUseItem.IsValid() || combatChar.GetPreparingItem().IsValid())
-            {
-                __result = CombatCharacterStateType.PrepareUseItem;
-                return;
-            }
-
-            if (combatChar.NeedPauseJumpMove)
-            {
-                __result = CombatCharacterStateType.JumpMove;
-                return;
-            }
-
-            if (combatChar.NeedEnterSpecialShow)
-            {
-                __result = CombatCharacterStateType.SpecialShow;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[XuanShuFourArts] four-set command priority failed: {ex}");
-        }
     }
 }
