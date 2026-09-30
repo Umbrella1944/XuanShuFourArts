@@ -1,4 +1,5 @@
 using System;
+using CoreSkillGrowth.Shared;
 using GameData.Combat.Math;
 using GameData.Domains.Character;
 using HarmonyLib;
@@ -12,8 +13,6 @@ namespace XuanShuFourArts.Backend;
 })]
 internal static class FourSetBonusPatch
 {
-    private const int MajorCombatPropertyBonusPercent = 15;
-
     [HarmonyPostfix]
     private static void AddFourSetBonus(
         Character __instance,
@@ -31,7 +30,7 @@ internal static class FourSetBonusPatch
                 return;
             }
 
-            __result = __result.ChangeB(MajorCombatPropertyBonusPercent);
+            __result = __result.ChangeB(StrengthSettings.SetCombatBonus);
         }
         catch (Exception ex)
         {

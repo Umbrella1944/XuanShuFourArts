@@ -8,10 +8,12 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 
 ## Current Release
 
-- Mod version: `1.0.1.8`
-- Supported game version: `1.0.29`
+- Mod version: `1.0.3.0`
+- Supported game version: `1.1.23`
 - Workshop FileId: `3747599301`
 - Author: `Umbrella`
+
+Compatibility validation and remaining in-game checks: [1.1.23 maintenance report](docs/MAINTENANCE-1.1.23.zh-CN.md). Local deployment and offline checks are complete. The author published the Workshop update on 2026-09-29; actual gameplay validation remains pending.
 
 ## Features
 
@@ -22,6 +24,15 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 - Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: a complete Normal Attack sequence that lands at least once can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
 - Adds in-game set tooltip support with Alt details, while suppressing the large set tooltip during combat.
 - Supports Chinese and English in-game text at game startup.
+- Adds five independent strength sliders (10%–300%, step 10%): four individual arts and the four-piece bonus. All default to 100%; restart after changes.
+
+## Strength Settings
+
+Open this mod's detailed settings in the game's mod manager. Set each art and the set bonus independently; 100% preserves the previous balance. The sliders adjust numerical benefits, not exact final damage. Costs, requirements, durations, stack limits and core effect rules are retained. Changes take effect after a full restart, and tooltips display the active values.
+
+For example, Blood-Rift at 50% has a 10% base trigger chance and +75% pursuit power per stack. Keeping the set slider at 100% retains the set's +100% Normal Attack power bonus. Fractional injury recovery is resolved probabilistically; other integer bonuses round to the nearest integer.
+
+Scope and verification: [strength settings notes](docs/STRENGTH-SETTINGS.zh-CN.md). Existing player settings are preserved during local deployment; an older empty settings file uses the new 100% defaults.
 
 ## Repository Layout
 
@@ -75,14 +86,16 @@ dist/Plugins/
    - Keep the default workshop metadata in English.
    - Do not replace the default English `Title` or `Description` with the Simplified Chinese page text.
 3. Keep `DetailImageList = { }` unless the workshop detail-image order intentionally needs to be replaced.
-4. Build both projects.
-5. Sync `dist/Config.Lua`, `dist/Settings.Lua`, `dist/Plugins/`, and required image assets to:
+4. Before uploading, confirm the local game/workshop `Config.Lua` upload source still has the default English `Title` and `Description`; the in-game manager can rewrite it to Chinese after an upload, and uploading from that file will overwrite the Steam English page.
+5. Write Steam Change Notes as `[h1]Title[/h1]` followed by `*` bullet lines; do not use `[list]` or `[*]`.
+6. Build both projects.
+7. Sync `dist/Config.Lua`, `dist/Settings.Lua`, `dist/Plugins/`, and required image assets to:
 
 ```text
 C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu\Mod\XuanShuFourArts
 ```
 
-6. Upload through the in-game mod manager.
+8. Upload through the in-game mod manager.
 
 ## Compatibility Notes
 

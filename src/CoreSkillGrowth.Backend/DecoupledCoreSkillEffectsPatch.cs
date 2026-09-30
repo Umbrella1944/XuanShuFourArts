@@ -13,8 +13,6 @@ namespace XuanShuFourArts.Backend;
 
 internal static class DecoupledCoreSkillEffects
 {
-    private const int ShuiHuoReduceInjuryCount = 1;
-
     internal static bool CanAffectSkill(CombatCharacter combatChar, short skillId)
     {
         return combatChar != null &&
@@ -35,7 +33,8 @@ internal static class DecoupledCoreSkillEffects
         }
 
         int availableUnits = defender.GetMobilityValue() * 100 / MoveSpecialConstants.MaxMobility + 1;
-        int damageUnit = Math.Max(defender.GetDamageStepCollection().FatalDamageStep / 10, 1);
+        int damageUnit = Math.Max(StrengthSettings.Scale(
+            Math.Max(defender.GetDamageStepCollection().FatalDamageStep / 10, 1), StrengthSettings.ShadowStep), 1);
         int consumedUnits = Math.Min(damageValue / damageUnit, availableUnits);
         int mobilityCost = -MoveSpecialConstants.MaxMobility * consumedUnits / 100;
 
@@ -59,6 +58,9 @@ internal static class DecoupledCoreSkillEffects
 
         Injuries injuries = combatChar.GetInjuries();
         Injuries oldInjuries = combatChar.GetOldInjuries();
+        // Preserve the old random sequence at the default/integer multipliers.
+        int healingCount = StrengthSettings.InjuryRecoveryCount(
+            StrengthSettings.FormRestoring % 100 == 0 ? 100 : context.Random.Next(100));
 
         for (sbyte bodyPart = 0; bodyPart < 7; bodyPart++)
         {
@@ -72,11 +74,11 @@ internal static class DecoupledCoreSkillEffects
             injuries.Change(
                 bodyPart,
                 isInnerInjury: false,
-                (sbyte)(-Math.Min(Math.Max(outer - oldOuter, 0), ShuiHuoReduceInjuryCount)));
+                (sbyte)(-Math.Min(Math.Max(outer - oldOuter, 0), healingCount)));
             injuries.Change(
                 bodyPart,
                 isInnerInjury: true,
-                (sbyte)(-Math.Min(Math.Max(inner - oldInner, 0), ShuiHuoReduceInjuryCount)));
+                (sbyte)(-Math.Min(Math.Max(inner - oldInner, 0), healingCount)));
         }
 
         Injuries newInjuries = injuries.Subtract(oldInjuries);

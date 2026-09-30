@@ -40,14 +40,13 @@ internal sealed class BloodRiftCombatState
 internal static class BloodRiftPursuitRuntime
 {
     private static readonly bool BloodRiftTestMode = false;
-    private const int BaseChancePercent = 20;
+    private static int BaseChancePercent => StrengthSettings.BloodRiftChance;
     private const int PityStartFailures = 4;
-    private const int PityStepPercent = 15;
+    private static int PityStepPercent => StrengthSettings.SetPityStep;
     private const int PityMaxChancePercent = 100;
-    private const int FullSetNormalAttackPowerPercent = 200;
     private const int TriggerStacks = 2;
     private const int MaxStacks = 10;
-    private const int PursuitPowerPercentPerStack = 150;
+    private static int PursuitPowerPercentPerStack => StrengthSettings.BloodRiftPowerPerStack;
 
     private static readonly Dictionary<int, BloodRiftCombatState> CombatStates = new Dictionary<int, BloodRiftCombatState>();
 
@@ -290,7 +289,7 @@ internal static class BloodRiftPursuitRuntime
 
     internal static void AmplifyNormalAttackPower(ref int power)
     {
-        power = Math.Max(0, power * FullSetNormalAttackPowerPercent / 100);
+        power = StrengthSettings.Amplify(power, StrengthSettings.SetNormalAttackBonus);
     }
 
     internal static void AmplifyBloodRiftPursuitPower(CombatContext context, ref int power)
@@ -303,8 +302,8 @@ internal static class BloodRiftPursuitRuntime
             return;
         }
 
-        int multiplierPercent = 100 + state.FreeAttackSnapshotStacks * PursuitPowerPercentPerStack;
-        power = Math.Max(0, power * multiplierPercent / 100);
+        int bonusPercent = state.FreeAttackSnapshotStacks * PursuitPowerPercentPerStack;
+        power = StrengthSettings.Amplify(power, bonusPercent);
         if (!state.FreeAttackDamageSettled)
         {
             state.Stacks = 0;
@@ -324,7 +323,7 @@ internal static class BloodRiftPursuitRuntime
             !hit ||
             isFightBack ||
             attacker.IsAutoNormalAttackingSpecial ||
-            attacker.IsBreakAttacking ||
+            !IsInNormalAttackState(attacker, CombatCharacterStateType.Attack) ||
             !attacker.IsAlly ||
             !DomainManager.Combat.IsMainCharacter(attacker) ||
             !DomainManager.Combat.IsInCombat())
@@ -358,7 +357,7 @@ internal static class BloodRiftPursuitRuntime
             !combatChar.IsAlly ||
             !DomainManager.Combat.IsMainCharacter(combatChar) ||
             combatChar.GetIsFightBack() ||
-            combatChar.IsBreakAttacking ||
+            !IsInNormalAttackState(combatChar, CombatCharacterStateType.PrepareAttack) ||
             combatChar.IsAutoNormalAttacking ||
             combatChar.IsAutoNormalAttackingSpecial)
         {
@@ -368,6 +367,14 @@ internal static class BloodRiftPursuitRuntime
         Character character = combatChar.GetCharacter();
         return character != null &&
             character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
+    }
+
+    private static bool IsInNormalAttackState(CombatCharacter combatChar, CombatCharacterStateType stateType)
+    {
+        // 1.1 removed IsBreakAttacking. The native preparation event is raised
+        // before PrepareAttack transitions to Attack; hit events run in Attack.
+        // CastSkill and UnlockAttack remain separate and cannot earn a ticket.
+        return combatChar?.StateMachine?.GetCurrentState()?.StateType == stateType;
     }
 
     private static BloodRiftCombatState GetCombatState(int charId)
@@ -659,7 +666,9 @@ internal static class BloodRiftPursuitHitPatch
     {
         if (BloodRiftPursuitRuntime.ShouldForceBloodRiftPursuitHit(attacker, skillId))
         {
-            __result = -1;
+            // Keep the hit odds non-negative so vanilla effects that inspect hit data
+            // do not enter fallback body-part paths with invalid normal-attack tricks.
+            __result = Math.Max(__result, 100);
         }
     }
 }

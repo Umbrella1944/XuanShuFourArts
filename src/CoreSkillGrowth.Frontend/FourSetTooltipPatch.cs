@@ -86,20 +86,10 @@ internal static class FourSetUiState
         bool detailMode = IsDetailMode();
         int displayCount = Math.Max(0, _currentCount);
 
-        if (IsEnglishLanguage())
-        {
-            title = $"Mystic Pivot Four Arts {displayCount}/4";
-            desc = detailMode
-                ? "4-piece set effect\nFour Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\nBlood-Rift - Hairline Rift: Normal Attack Power +100%.\nBlood-Rift - Tide of Aftershadows: After Blood-Rift fails to trigger 4 times in a row, trigger assurance begins; each further failure increases trigger chance by 15%, up to 100%.\nReturning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\nShadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\nTwofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active."
-                : "4pc: Major combat attributes +15%; Normal Attack Power +100%.\nHold Alt for details.";
-        }
-        else
-        {
-            title = $"玄枢四诀 {displayCount}/4";
-            desc = detailMode
-                ? "4件套装效果\n四诀共鸣：攻击、防御、命中、化解 +15%。\n万噬血隙·一线微裂：普通攻击威力 +100%。\n万噬血隙·后影潮复：血隙连续4次未触发后开始获得保底加成，每次失败使触发机率+15%，最高100%。\n玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。"
-                : "4件：主战斗属性 +15%；普通攻击威力 +100%。\n按住 Alt 查看详细效果。";
-        }
+        bool english = IsEnglishLanguage();
+        title = english ? $"Mystic Pivot Four Arts {displayCount}/4" : $"玄枢四诀 {displayCount}/4";
+        desc = (detailMode ? (english ? "4-piece set effect\n" : "4件套装效果\n") : "") +
+            StrengthDescriptions.SetEffects(english, detailMode);
 
         return
             $"<color={color}><b>{title}</b></color>\n" +
@@ -116,28 +106,11 @@ internal static class FourSetUiState
         int displayCount = Math.Max(0, _currentCount);
         string activeColor = _currentCount >= 4 ? "#D8C06A" : "#8A8F8A";
 
-        if (IsEnglishLanguage())
-        {
-            return
-                $"<color={activeColor}><b>Mystic Pivot Four Arts</b></color>\n" +
-                $"Progress: {displayCount}/4\n" +
-                "Four Arts Resonance: Attack, Defense, Hit, and Deflection +15%.\n" +
-                "Blood-Rift - Hairline Rift: Normal Attack Power +100%.\n" +
-                "Blood-Rift - Tide of Aftershadows: After Blood-Rift fails to trigger 4 times in a row, trigger assurance begins; each further failure increases trigger chance by 15%, up to 100%.\n" +
-                "Returning-Frame - Wounds Return to Pivot: Inner Art passive recovery +42.9%.\n" +
-                "Shadow Step - Twin Shadows: Shadow-Reflecting Wandering Step's active Movement Speed bonus +40% while active.\n" +
-                "Twofold Qi - Double Rampart: Yin-Yang Form-Restoring Art's active Phy. Defense, Qi Defense, Resistance, Parry, and Dodge bonuses +40% while active.";
-        }
-
-        return
-            $"<color={activeColor}><b>玄枢四诀 套装效果</b></color>\n" +
-            $"当前进度：{displayCount}/4\n" +
-            "四诀共鸣：攻击、防御、命中、化解 +15%。\n" +
-            "万噬血隙·一线微裂：普通攻击威力 +100%。\n" +
-            "万噬血隙·后影潮复：血隙连续4次未触发后开始获得保底加成，每次失败使触发机率+15%，最高100%。\n" +
-            "玄息归骸·百损归枢：内功被动恢复效果 +42.9%。\n" +
-            "照影游身·逐影成双：照影游身步持续期间，施展移动速度提高效果 +40%。\n" +
-            "两仪还形·二气重垣：两仪还形功持续期间，施展提供的御体、御气、卸力、拆招、闪避效果 +40%。";
+        bool english = IsEnglishLanguage();
+        string title = english ? "Mystic Pivot Four Arts" : "玄枢四诀 套装效果";
+        string progress = english ? $"Progress: {displayCount}/4" : $"当前进度：{displayCount}/4";
+        return $"<color={activeColor}><b>{title}</b></color>\n{progress}\n" +
+            StrengthDescriptions.SetEffects(english, true);
     }
 
     internal static string AppendSetHint(short skillId, string originalText)
@@ -290,14 +263,33 @@ internal static class FourSetNewEquipSkillCachePatch
     }
 }
 
-[HarmonyPatch(typeof(UI_CharacterMenuEquipCombatSkill), "RefreshEquippedCombatSkills")]
+[HarmonyPatch]
 internal static class FourSetEquippedSkillCachePatch
 {
+    // The old equipment screen was removed in 1.1. Resolve it only when present;
+    // current equipment screens are handled by FourSetNewEquipSkillCachePatch.
+    private static readonly Type LegacyEquipViewType =
+        AccessTools.TypeByName("UI_CharacterMenuEquipCombatSkill");
+
     private static readonly FieldInfo EquippedCombatSkillListField =
-        AccessTools.Field(typeof(UI_CharacterMenuEquipCombatSkill), "_equippedCombatSkillList");
+        LegacyEquipViewType == null ? null : AccessTools.Field(LegacyEquipViewType, "_equippedCombatSkillList");
+
+    [HarmonyTargetMethod]
+    private static MethodBase TargetMethod()
+    {
+        return LegacyEquipViewType == null
+            ? null
+            : AccessTools.Method(LegacyEquipViewType, "RefreshEquippedCombatSkills");
+    }
+
+    [HarmonyPrepare]
+    private static bool Prepare()
+    {
+        return TargetMethod() != null;
+    }
 
     [HarmonyPostfix]
-    private static void CacheEquippedSkills(UI_CharacterMenuEquipCombatSkill __instance)
+    private static void CacheEquippedSkills(object __instance)
     {
         try
         {

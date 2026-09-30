@@ -24,6 +24,9 @@ obj/
 artifacts/
 release/
 
+# Private maintenance evidence, game decompilations, logs and local backups
+maintenance/
+
 # Local publish backups
 *.overwritten-backup-*
 Config.Lua.overwritten-backup-*

@@ -11,7 +11,7 @@ namespace XuanShuFourArts.Backend;
 
 internal static class FourSetActiveSkillBonus
 {
-    internal const int ActiveSkillBonusPercent = 40;
+    internal static int ActiveSkillBonusPercent => StrengthSettings.SetActiveBonus;
 
     internal static bool HasFullSetEquipped(int characterId)
     {
@@ -69,7 +69,7 @@ internal static class FourSetActiveMoveSpeedPatch
             }
 
             __result = (short)Math.Clamp(
-                __result + __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100,
+                StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent),
                 short.MinValue,
                 short.MaxValue);
         }
@@ -97,7 +97,7 @@ internal static class FourSetActiveDefendAvoidPatch
                 return;
             }
 
-            __result += __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100;
+            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent);
         }
         catch (Exception ex)
         {
@@ -126,7 +126,7 @@ internal static class FourSetActiveDefendPenetrateResistPatch
                 return;
             }
 
-            __result += __result * FourSetActiveSkillBonus.ActiveSkillBonusPercent / 100;
+            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent);
         }
         catch (Exception ex)
         {

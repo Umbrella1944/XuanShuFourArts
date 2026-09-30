@@ -4,13 +4,14 @@ using TaiwuModdingLib.Core.Plugin;
 
 namespace XuanShuFourArts.Frontend;
 
-[PluginConfig("XuanShuFourArtsFrontend", "Umbrella", "1.0.1.8")]
+[PluginConfig("XuanShuFourArtsFrontend", "Umbrella", "1.0.3.0")]
 public sealed class FrontendPlugin : TaiwuRemakePlugin
 {
     private Harmony _harmony;
 
     public override void Initialize()
     {
+        StrengthSettings.Load(ModIdStr);
         _harmony = new Harmony(GetGuid());
         _harmony.PatchAll(typeof(FrontendPlugin).Assembly);
 

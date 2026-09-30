@@ -21,6 +21,7 @@
     <Compile Include="FrontendPlugin.cs" />
     <Compile Include="FourSetTooltipPatch.cs" />
     <Compile Include="..\CoreSkillGrowth.Shared\CoreSkillGrowthConfigPatch.cs" Link="CoreSkillGrowthConfigPatch.cs" />
+    <Compile Include="..\CoreSkillGrowth.Shared\StrengthSettings.cs" Link="StrengthSettings.cs" />
   </ItemGroup>
 
   <ItemGroup>

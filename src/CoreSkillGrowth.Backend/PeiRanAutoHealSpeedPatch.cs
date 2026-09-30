@@ -13,9 +13,6 @@ namespace XuanShuFourArts.Backend;
 internal static class PeiRanAutoHealRuntime
 {
     private const short ActiveSpeed = 1;
-    private const short SuppressedSpeed = 0;
-    private const int BaseTicksPerActiveHeal = 10;
-    private const int FullSetTicksPerActiveHeal = 7;
 
     private static readonly Dictionary<int, HealThrottleState> States = new Dictionary<int, HealThrottleState>();
 
@@ -60,19 +57,10 @@ internal static class PeiRanAutoHealRuntime
         }
 
         state.DisabledForThisTick = false;
-        state.TickCounter++;
-        int ticksPerActiveHeal = FourSetActiveSkillBonus.HasFullSetEquipped(combatChar.GetId())
-            ? FullSetTicksPerActiveHeal
-            : BaseTicksPerActiveHeal;
-
-        if (state.TickCounter % ticksPerActiveHeal == 0)
-        {
-            EnsureSpeed(combatChar, state, ActiveSpeed);
-            return;
-        }
-
-        EnsureSpeed(combatChar, state, SuppressedSpeed);
-        state.DisabledForThisTick = true;
+        short speed = StrengthSettings.NextHealSpeed(ref state.HealProgress,
+            FourSetActiveSkillBonus.HasFullSetEquipped(combatChar.GetId()));
+        EnsureSpeed(combatChar, state, speed);
+        state.DisabledForThisTick = speed != ActiveSpeed;
     }
 
     internal static void AfterAutoHealUpdate(CombatCharacter combatChar)
@@ -101,13 +89,14 @@ internal static class PeiRanAutoHealRuntime
 
     private static void EnsureSpeed(CombatCharacter combatChar, HealThrottleState state, short speed)
     {
-        SetSlot(combatChar.InnerInjuryAutoHealSpeeds, state.InnerNewIndex, speed);
-        SetSlot(combatChar.OuterInjuryAutoHealSpeeds, state.OuterNewIndex, speed);
-        SetSlot(combatChar.InnerOldInjuryAutoHealSpeeds, state.InnerOldIndex, speed);
-        SetSlot(combatChar.OuterOldInjuryAutoHealSpeeds, state.OuterOldIndex, speed);
+        SetSlot(combatChar.InnerInjuryAutoHealSpeeds, state.InnerNewIndex, state.CurrentSpeed, speed);
+        SetSlot(combatChar.OuterInjuryAutoHealSpeeds, state.OuterNewIndex, state.CurrentSpeed, speed);
+        SetSlot(combatChar.InnerOldInjuryAutoHealSpeeds, state.InnerOldIndex, state.CurrentSpeed, speed);
+        SetSlot(combatChar.OuterOldInjuryAutoHealSpeeds, state.OuterOldIndex, state.CurrentSpeed, speed);
+        state.CurrentSpeed = speed;
     }
 
-    private static void SetSlot(List<short> speeds, int index, short speed)
+    private static void SetSlot(List<short> speeds, int index, short previousSpeed, short speed)
     {
         if (speeds == null || index < 0 || index >= speeds.Count)
         {
@@ -115,7 +104,7 @@ internal static class PeiRanAutoHealRuntime
         }
 
         short current = speeds[index];
-        if (current == ActiveSpeed || current == SuppressedSpeed)
+        if (current == previousSpeed)
         {
             speeds[index] = speed;
         }
@@ -127,7 +116,8 @@ internal static class PeiRanAutoHealRuntime
         public int OuterNewIndex = -1;
         public int InnerOldIndex = -1;
         public int OuterOldIndex = -1;
-        public int TickCounter;
+        public int HealProgress;
+        public short CurrentSpeed = ActiveSpeed;
         public bool DisabledForThisTick;
 
         public bool IsComplete =>

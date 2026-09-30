@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.3.0
+
+- Added independent strength settings for all four arts and the four-piece set bonus, from 10% to 300% in 10% steps; all defaults remain 100%.
+- Connected the settings to Practice and active bonuses, Body/Mind and Inner Qi benefits, passive healing, Stamina damage conversion, injury recovery, Blood-Rift chance/power and set bonuses.
+- Kept costs, requirements, grade, grids, durations, stack limits and effect eligibility rules unchanged.
+- Added bilingual settings descriptions and dynamic Chinese/English effect and set tooltips. Full restart is required after changes.
+- Preserved missing-setting defaults and bounded loaded values; used fractional healing progress and probabilistic fractional injury recovery.
+- Local build and offline validation completed. The author published the Workshop update on 2026-09-29; in-game UI/combat validation remains pending.
+
+## 1.0.2.0
+
+- Updated supported game version to 1.1.23.
+- Adapted all four arts to the current 16-bit direct/reverse effect ID fields, preventing config initialization failures.
+- Replaced the removed combat flag with current native Normal Attack state checks for Blood-Rift eligibility.
+- Made the removed legacy equipment-screen adapter optional; the current equipment screen retains all five set-progress refresh hooks.
+- Preserved all four arts, set bonuses, balance values, and Chinese/English tooltips.
+
+## 1.0.1.9
+
+- Updated supported game version to 1.0.45.
+- Increased the four-piece enhancement for Profound Breath Returning-Frame Sutra's passive recovery from 1 active tick per 7 auto-heal updates to 1 active tick per 5 auto-heal updates.
+- Updated the four-piece tooltip text for Wounds Return to Pivot from +42.9% to +100%.
+- Improved Blood-Rift Pursuit forced-hit compatibility by avoiding negative hit-odds sentinel values during special-effect checks.
+
 ## 1.0.1.8
 
 - Added a Normal Attack eligibility ticket for Blood-Rift triggering.
