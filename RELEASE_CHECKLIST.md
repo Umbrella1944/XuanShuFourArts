@@ -56,8 +56,8 @@ Use this checklist before every workshop update.
 ## Build
 
 ```powershell
-dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj
-dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj
+dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj -c Release
+dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj -c Release
 ```
 
 Both builds should finish with 0 errors.

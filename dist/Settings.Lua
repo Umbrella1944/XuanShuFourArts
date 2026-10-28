@@ -4,4 +4,13 @@ return {
     FormRestoringStrength = 100,
     BloodRiftStrength = 100,
     FourPieceStrength = 100,
+    GrowthEnabled = true,
+    GrowthBasePercent = 25,
+    GrowthJingChunPer = 6,
+    GrowthReincPer = 15,
+    GrowthAgePerFiveYears = 2,
+    GrowthSkillPer = 1,
+    GrowthSkillCap = 60,
+    NpcBloodRiftEnabled = true,
+    DebugLoggingEnabled = false,
 }

@@ -13,6 +13,19 @@ internal static class FourSetActiveSkillBonus
 {
     internal static int ActiveSkillBonusPercent => StrengthSettings.SetActiveBonus;
 
+    // Growth-scaled four-piece active bonus for a concrete wielder.
+    internal static int ActiveBonusFor(int charId)
+    {
+        return GrowthSettings.ScaleByFactor(ActiveSkillBonusPercent, GrowthSettings.FactorForCharacter(charId));
+    }
+
+    // Scale a baked skill value (move speed / avoid / penetrate resist that the
+    // config patch wrote at slider strength) by the wielder's growth factor.
+    internal static int ScaleSkillBase(int bakedValue, int charId)
+    {
+        return GrowthSettings.ScaleByFactor(bakedValue, GrowthSettings.FactorForCharacter(charId));
+    }
+
     internal static bool HasFullSetEquipped(int characterId)
     {
         return HasFullSetEquipped(DomainManager.Character.GetElement_Objects(characterId));
@@ -63,19 +76,30 @@ internal static class FourSetActiveMoveSpeedPatch
             }
 
             CombatCharacter combatChar = DomainManager.Combat.GetElement_CombatCharacterDict(skillKey.CharId);
-            if (!FourSetActiveSkillBonus.IsAffectingSetMoveSkill(combatChar))
+            bool fullSet = FourSetActiveSkillBonus.IsAffectingSetMoveSkill(combatChar);
+            // Grow the art's own baked cast bonus whenever it is the active move
+            // skill; the set bonus stacks on top only with the full set.
+            if (combatChar != null && combatChar.GetAffectingMoveSkillId() == CoreSkillGrowthConfigPatch.XiaoZongYueGong)
+            {
+                __result = (short)Math.Clamp(
+                    FourSetActiveSkillBonus.ScaleSkillBase(__result, skillKey.CharId),
+                    short.MinValue,
+                    short.MaxValue);
+            }
+
+            if (!fullSet)
             {
                 return;
             }
 
             __result = (short)Math.Clamp(
-                StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent),
+                StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveBonusFor(skillKey.CharId)),
                 short.MinValue,
                 short.MaxValue);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set active move skill speed failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set active move skill speed failed: {ex}");
         }
     }
 }
@@ -92,16 +116,28 @@ internal static class FourSetActiveDefendAvoidPatch
     {
         try
         {
-            if (ignoreDefendSkill || __result <= 0 || !FourSetActiveSkillBonus.IsAffectingSetDefendSkill(__instance))
+            if (__result <= 0)
             {
                 return;
             }
 
-            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent);
+            // Grow the art's own baked defend bonus whenever it is active; the
+            // set bonus stacks on top only with the full set.
+            if (__instance.GetAffectingDefendSkillId() == CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong)
+            {
+                __result = FourSetActiveSkillBonus.ScaleSkillBase(__result, __instance.GetId());
+            }
+
+            if (ignoreDefendSkill || !FourSetActiveSkillBonus.IsAffectingSetDefendSkill(__instance))
+            {
+                return;
+            }
+
+            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveBonusFor(__instance.GetId()));
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set active defend avoid failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set active defend avoid failed: {ex}");
         }
     }
 }
@@ -121,16 +157,28 @@ internal static class FourSetActiveDefendPenetrateResistPatch
     {
         try
         {
-            if (ignoreDefendSkill || __result <= 0 || !FourSetActiveSkillBonus.IsAffectingSetDefendSkill(__instance))
+            if (__result <= 0)
             {
                 return;
             }
 
-            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveSkillBonusPercent);
+            // Grow the art's own baked defend bonus whenever it is active; the
+            // set bonus stacks on top only with the full set.
+            if (__instance.GetAffectingDefendSkillId() == CoreSkillGrowthConfigPatch.ShuiHuoYingQiGong)
+            {
+                __result = FourSetActiveSkillBonus.ScaleSkillBase(__result, __instance.GetId());
+            }
+
+            if (ignoreDefendSkill || !FourSetActiveSkillBonus.IsAffectingSetDefendSkill(__instance))
+            {
+                return;
+            }
+
+            __result = StrengthSettings.Amplify(__result, FourSetActiveSkillBonus.ActiveBonusFor(__instance.GetId()));
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set active defend penetrate resist failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set active defend penetrate resist failed: {ex}");
         }
     }
 }

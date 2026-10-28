@@ -8,7 +8,7 @@ Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/AR
 
 ## Current Release
 
-- Mod version: `1.0.3.0`
+- Mod version: `1.1.0.0`
 - Supported game version: `1.1.23`
 - Workshop FileId: `3747599301`
 - Author: `Umbrella`
@@ -23,8 +23,10 @@ Compatibility validation and remaining in-game checks: [1.1.23 maintenance repor
 - Uses independent empty effect shells plus backend patches for the four core passives, avoiding changes to the original vanilla effect entries.
 - Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: a complete Normal Attack sequence that lands at least once can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
 - Adds in-game set tooltip support with Alt details, while suppressing the large set tooltip during combat.
-- Supports Chinese and English in-game text at game startup.
+- Supports CN/CNH/EN/KO in-game text at game startup, with English fallback for unknown languages.
 - Adds five independent strength sliders (10%–300%, step 10%): four individual arts and the four-piece bonus. All default to 100%; restart after changes.
+- Adds per-character growth using the same algorithm for Taiwu and NPCs, with configurable Consummate, reincarnation, lifespan-relative age and learned-skill weights.
+- Adds an NPC Blood-Rift and Normal Attack bonus toggle, enabled by default, and an optional rate-limited debug logging toggle.
 
 ## Strength Settings
 

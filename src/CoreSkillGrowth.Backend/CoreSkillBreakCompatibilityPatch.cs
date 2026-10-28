@@ -89,7 +89,7 @@ internal static class CoreSkillBreakCompatibility
             return true;
         }
 
-        Console.WriteLine($"[XuanShuFourArts] {patchName} skipped: target method not found.");
+        ModLog.Warn($"[XuanShuFourArts] {patchName} skipped: target method not found.");
         return false;
     }
 }
@@ -123,7 +123,7 @@ internal static class CoreSkillBreakCostPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] core skill break cost compatibility failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] core skill break cost compatibility failed: {ex}");
         }
     }
 }
@@ -177,7 +177,7 @@ internal static class CoreSkillBreakAvailableStepsPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] core skill break steps compatibility failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] core skill break steps compatibility failed: {ex}");
         }
     }
 }
@@ -231,7 +231,7 @@ internal static class CoreSkillBreakSuccessRatePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] core skill break success compatibility failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] core skill break success compatibility failed: {ex}");
         }
     }
 }
@@ -275,7 +275,7 @@ internal static class CoreSkillBreakInfoPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] core skill break info compatibility failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] core skill break info compatibility failed: {ex}");
         }
     }
 }
@@ -319,7 +319,7 @@ internal static class CoreSkillEnterBreakPlatePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] core skill break plate runtime compatibility failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] core skill break plate runtime compatibility failed: {ex}");
         }
     }
 }

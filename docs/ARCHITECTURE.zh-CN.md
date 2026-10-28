@@ -36,7 +36,9 @@ dist/
 
 ## 启动流程
 
-1.0.3.0 新增共享 `StrengthSettings`：两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取五项百分比并冻结本次启动快照。设置界面声明需要重启；当前会话不热改配置和缓存。完整范围及验证见 [强度设置说明](STRENGTH-SETTINGS.zh-CN.md)。
+两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取强度、成长、NPC 效果与调试设置并冻结本次启动快照。设置界面声明需要重启；当前会话不热改配置和缓存。
+
+1.1.0 的成长模型采用“共享基准配置＋按使用者运行时调整”：配置只保存强度滑条对应的基准值，成长算法集中在 `GrowthSettings`，各消费补丁根据 `Character`、`CombatSkillKey.CharId` 或 `CombatContext` 分别计算太吾与 NPC 的倍率。伤害步进、内力等字段也在带角色上下文的消费点处理，不按太吾倍率重写全局配置。
 
 两个插件入口分别是：
 
