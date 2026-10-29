@@ -8,7 +8,7 @@
 - Fixed Stamina damage conversion discarding non-integer damage remainders.
 - Added rate-limited diagnostics and an optional debug logging toggle; separated Debug and Release build outputs.
 - Added tooltip lifecycle cleanup and state-based refresh to reduce repeated layout work.
-- Added Korean localization for settings, arts, effects and tooltips; CNH uses Chinese text and unknown languages fall back to English.
+- Added Korean localization for settings, arts, effects and tooltips; CNH uses Chinese text and unknown languages fall back to Chinese.
 
 ## 1.0.3.0
 

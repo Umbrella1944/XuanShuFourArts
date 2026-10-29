@@ -14,7 +14,7 @@ internal static class ModLanguage
             }
             catch
             {
-                return "EN";
+                return "CN";
             }
         }
     }
@@ -22,10 +22,10 @@ internal static class ModLanguage
     internal static string Normalize(string languageKey)
     {
         string key = (languageKey ?? string.Empty).Trim().ToUpperInvariant();
-        return key == "CN" || key == "CNH" || key == "KO" || key == "EN" ? key : "EN";
+        return key == "CN" || key == "CNH" || key == "KO" || key == "EN" ? key : "CN";
     }
 
-    internal static string Select(string chinese, string english, string korean, string japanese, string traditionalChinese = null)
+    internal static string SelectCurrent(string chinese, string english, string korean, string japanese, string traditionalChinese = null)
     {
         switch (Current)
         {
@@ -35,8 +35,10 @@ internal static class ModLanguage
                 return traditionalChinese ?? chinese;
             case "KO":
                 return korean;
-            default:
+            case "EN":
                 return english;
+            default:
+                return chinese;
         }
     }
 
@@ -50,8 +52,10 @@ internal static class ModLanguage
                 return traditionalChinese ?? chinese;
             case "KO":
                 return korean;
-            default:
+            case "EN":
                 return english;
+            default:
+                return chinese;
         }
     }
 
@@ -65,8 +69,10 @@ internal static class ModLanguage
                 return traditionalChinese ?? chinese;
             case "KO":
                 return korean;
-            default:
+            case "EN":
                 return english;
+            default:
+                return chinese;
         }
     }
 }

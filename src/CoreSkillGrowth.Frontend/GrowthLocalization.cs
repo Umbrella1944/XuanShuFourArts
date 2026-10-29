@@ -10,10 +10,13 @@ namespace XuanShuFourArts.Frontend;
 
 internal static class GrowthLocalization
 {
+    private static string _targetModId;
+
     internal static void Apply(string modIdStr)
     {
         if (ModManager.LocalMods.TryGetValue(modIdStr, out ModInfoWithDisplayData modInfo))
         {
+            _targetModId = modInfo.ModId.ToString();
             ApplyToModInfo(modInfo);
         }
     }
@@ -22,15 +25,15 @@ internal static class GrowthLocalization
     {
         try
         {
-            if (modInfo?.ModSettingEntries == null)
+            if (modInfo == null || modInfo.ModSettingEntries == null || modInfo.ModId.ToString() != _targetModId)
             {
                 return;
             }
 
             string language = ModLanguage.Current;
-            string strengthGroup = ModLanguage.Select("强度", "Strength", "강도", "強度");
-            string growthGroup = ModLanguage.Select("成长", "Growth", "성장", "成長");
-            string debugGroup = ModLanguage.Select("调试", "Debug", "디버그", "デバッグ");
+            string strengthGroup = ModLanguage.SelectCurrent("强度", "Strength", "강도", "強度");
+            string growthGroup = ModLanguage.SelectCurrent("成长", "Growth", "성장", "成長");
+            string debugGroup = ModLanguage.SelectCurrent("调试", "Debug", "디버그", "デバッグ");
             foreach (SettingEntry entry in modInfo.ModSettingEntries)
             {
                 if (entry == null || !GrowthSettingTexts.TryGet(entry.Key, language, out string displayName, out string description))
@@ -65,7 +68,8 @@ internal static class GrowthLocalization
                 }
             }
 
-            modInfo.Title = ModLanguage.Select("玄枢四诀", "Four Arts of the Mystic Pivot", "현추사결", "Four Arts of the Mystic Pivot");
+            modInfo.Title = ModLanguage.SelectCurrent("玄枢四诀", "Four Arts of the Mystic Pivot", "현추사결", "Four Arts of the Mystic Pivot");
+            modInfo.Description = ModLanguage.SelectCurrent(GrowthModDescription.Chinese, modInfo.Description, modInfo.Description, modInfo.Description);
             string firstName = modInfo.ModSettingEntries.Count > 0 ? modInfo.ModSettingEntries[0].DisplayName : string.Empty;
             ModLog.Info($"[XuanShuFourArts] settings localization applied. Language={language} Entries={modInfo.ModSettingEntries.Count} First={firstName}");
         }
@@ -74,6 +78,109 @@ internal static class GrowthLocalization
             ModLog.Error($"[XuanShuFourArts] growth localization failed: {ex}");
         }
     }
+}
+
+internal static class GrowthModDescription
+{
+    internal const string Chinese = @"玄枢四诀
+
+作者：Umbrella
+游戏：《太吾绘卷》
+MOD 版本：1.1.0.0
+支持游戏版本：1.1.23
+
+[h1]1. 概述[/h1]
+本 MOD 将沛然诀、小纵跃功、水火硬气功和太祖长拳改造为神一品核心四件套，让这些原本仅适合前期过渡的基础功法，在游戏后期仍能作为核心构筑使用。
+玄枢四诀的设计目标是让四诀成为长期使用的运功效果核心，并辅以独特的套装加成系统。
+
+[h2]参考与致谢[/h2]
+本 MOD 的部分设计灵感来自以下 MOD，感谢原作者及社区提供的参考资料：
+https://steamcommunity.com/sharedfiles/filedetails/?id=3746556210
+
+[h1]2. 更新列表[/h1]
+[h2]如果没有看到更新，请重新订阅并重启游戏！[/h2]
+[h2]如果没有看到更新，请重新订阅并重启游戏！[/h2]
+[h2]如果没有看到更新，请重新订阅并重启游戏！[/h2]
+
+[h2]存档安全说明[/h2]
+我的原则是尽量避免损坏存档和出现红字错误。为此，我选择了较为谨慎的实现方式，也因此遇到了不少困难，但这些问题目前已经解决。这项工作比预期更复杂。
+即便如此，我仍无法保证错误永远不会发生。感谢你的理解，如遇到问题请及时反馈。
+
+感谢社区提供的一点灵感。本 MOD 现已开源。
+源代码：
+https://github.com/Umbrella1944/XuanShuFourArts
+
+[h1]1.1.0.0 角色成长与 NPC 效果更新[/h1]
+* 新增可配置的角色成长系统，成长来源包括精纯、轮回、年龄与寿命比例、已学功法。
+* 太吾与 NPC 使用同一套功法效果和成长算法，并提供 NPC 血隙与普通攻击加成开关。
+* 成长在各使用者的运行时消费点分别计算，不会用太吾的成长倍率改写共享配置。
+* 新增可选的限流诊断日志，并修复脚力伤害转换丢失非整数伤害余数的问题。
+
+[h1]1.0.3.0 兼容性与强度设置更新[/h1]
+* 支持游戏版本 1.1.23。
+* 更新四诀效果配置、血隙战斗判定和装备界面集成，以适配当前游戏版本。
+* 新增五项独立强度设置：四门单诀各一项，四件套加成为一项。
+* 每项设置范围为 10% 至 300%，步进为 10%，默认 100% 保持原有平衡。
+* 设置调整对应属性、恢复、伤害转换、血隙效果和套装加成。
+* 中英文提示会显示当前生效数值。
+
+[h2]1.0.0.1-1.0.1.9 更新[/h2]
+详情请参阅更新日志。
+
+[h1]3. 详细介绍[/h1]
+[h2]整体设计[/h2]
+核心思路是将前期过渡用的四门基础功法重塑为长期构筑基础。
+主要调整如下：
+[list]
+[*]四门功法全部重塑为神一品功法。
+[*]保留原本的九品学习与使用要求。
+[*]四门功法的正练与逆练效果保持一致。
+[*]调整四门功法的名称、描述、运功属性、施展效果、战斗效果及部分显示逻辑。
+[*]提高相关体魄与神识收益，使其符合神一品定位。
+[*]优先采用现有且稳定的游戏内战斗效果，现已实现安全的自定义路径。
+[/list]
+
+[h2]1. 玄息归骸经[/h2]
+原功法：沛然诀
+类型：内功
+定位：内息、生存、旧伤消退核心运功效果
+
+[h2]2. 照影游身步[/h2]
+原功法：小纵跃功
+类型：身法
+定位：移动、生存、伤害转换核心身法
+
+[h2]3. 两仪还形功[/h2]
+原功法：水火硬气功
+类型：护体绝技
+定位：短时防御窗口、伤势重分配护体绝技
+
+[h2]4. 万噬血隙拳[/h2]
+原功法：太祖长拳
+类型：拳掌摧破
+定位：噬隙追击、蓄势爆发核心摧破
+可由所有武器及普通攻击触发。
+
+[h2]注意事项[/h2]
+本 MOD 必然会与修改沛然诀、小纵跃功、水火硬气功或太祖长拳的其他 MOD 冲突。
+修改相关功法表、特效表、战斗结算或提示界面的 MOD，也可能存在兼容问题。
+建议将本 MOD 排在同类功法修改 MOD 之后加载，实际结果以游戏内效果为准。
+本 MOD 相当于一层安全的外层实现。理论上，在存档中途添加或移除也不应引发红字错误。
+实现结构尽量保持简洁，代码逻辑尽量保持安全，因此理论上不太可能出现红字错误。
+但仍无法完全避免红字错误、显示问题、效果覆盖或版本兼容问题。如遇上述情况，请留言反馈。
+
+感谢你的支持。
+
+我还制作了一个前置框架 MOD，供计划开发的 NPC 活动 MOD 使用，欢迎尝试：
+Taiwu Interaction Framework
+https://steamcommunity.com/sharedfiles/filedetails/?id=3749605687
+
+Taiwu Save Repair
+https://steamcommunity.com/sharedfiles/filedetails/?id=3751322965
+
+Taiwu English Localization Fixes
+https://steamcommunity.com/sharedfiles/filedetails/?id=3750166478
+";
 }
 
 [HarmonyPatch(typeof(ViewModInfo), "Refresh")]

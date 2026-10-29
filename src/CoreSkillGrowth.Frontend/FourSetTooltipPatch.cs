@@ -99,12 +99,12 @@ internal static class FourSetUiState
         int displayCount = Math.Max(0, _currentCount);
         string language = ModLanguage.Current;
 
-        title = ModLanguage.Select(
+        title = ModLanguage.SelectCurrent(
             $"玄枢四诀 {displayCount}/4",
             $"Mystic Pivot Four Arts {displayCount}/4",
             $"현추사결 {displayCount}/4",
             $"玄枢四诀 {displayCount}/4");
-        desc = (detailMode ? ModLanguage.Select("4件套装效果\n", "4-piece set effect\n", "4종 세트 효과\n", "4点セット効果\n") : "") +
+        desc = (detailMode ? ModLanguage.SelectCurrent("4件套装效果\n", "4-piece set effect\n", "4종 세트 효과\n", "4点セット効果\n") : "") +
             StrengthDescriptions.SetEffects(language, detailMode);
 
         return
@@ -122,8 +122,8 @@ internal static class FourSetUiState
         int displayCount = Math.Max(0, _currentCount);
         string activeColor = _currentCount >= 4 ? "#D8C06A" : "#8A8F8A";
         string language = ModLanguage.Current;
-        string title = ModLanguage.Select("玄枢四诀 套装效果", "Mystic Pivot Four Arts", "현추사결 세트 효과", "玄枢四诀 セット効果");
-        string progress = ModLanguage.Select($"当前进度：{displayCount}/4", $"Progress: {displayCount}/4", $"진행: {displayCount}/4", $"進行：{displayCount}/4");
+        string title = ModLanguage.SelectCurrent("玄枢四诀 套装效果", "Mystic Pivot Four Arts", "현추사결 세트 효과", "玄枢四诀 セット効果");
+        string progress = ModLanguage.SelectCurrent($"当前进度：{displayCount}/4", $"Progress: {displayCount}/4", $"진행: {displayCount}/4", $"進行：{displayCount}/4");
         return $"<color={activeColor}><b>{title}</b></color>\n{progress}\n" +
             StrengthDescriptions.SetEffects(language, true);
     }

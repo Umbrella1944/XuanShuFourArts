@@ -1,113 +1,95 @@
-# Four Arts of the Mystic Pivot
+# 玄枢四诀
 
-Source project for the Steam Workshop mod **Four Arts of the Mystic Pivot** for **The Scroll of Taiwu**.
+[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md)
 
-This repository contains the mod source code and release metadata. It is not affiliated with or endorsed by the developers or publishers of The Scroll of Taiwu.
+《太吾绘卷》功法套装 MOD「玄枢四诀」的源码与发布工程。本项目不是游戏官方或发行方的附属作品。
 
-Chinese architecture notes for mod authors: [docs/ARCHITECTURE.zh-CN.md](docs/ARCHITECTURE.zh-CN.md).
+中文架构说明见 [docs/ARCHITECTURE.zh-CN.md](docs/ARCHITECTURE.zh-CN.md)。
 
-## Current Release
+## 当前版本
 
-- Mod version: `1.1.0.0`
-- Supported game version: `1.1.23`
-- Workshop FileId: `3747599301`
-- Author: `Umbrella`
+- MOD 版本：`1.1.0.0`
+- 支持游戏版本：`1.1.23`
+- 创意工坊 FileId：`3747599301`
+- 作者：`Umbrella`
 
-Compatibility validation and remaining in-game checks: [1.1.23 maintenance report](docs/MAINTENANCE-1.1.23.zh-CN.md). Local deployment and offline checks are complete. The author published the Workshop update on 2026-09-29; actual gameplay validation remains pending.
+兼容性验证与实机检查边界见 [1.1.23 维护记录](docs/MAINTENANCE-1.1.23.zh-CN.md)。本地部署与离线检查已完成，作者已于 2026-09-29 发布工坊更新；完整游戏内验证仍需继续补充。
 
-## Features
+## 主要功能
 
-- Reworks four base sectless Tier 9 martial arts into Divine Tier 1 core arts.
-- Keeps low-tier learning, usage, and breakthrough burden for these four arts.
-- Adds a four-piece set bonus when all four arts are equipped for Practice.
-- Uses independent empty effect shells plus backend patches for the four core passives, avoiding changes to the original vanilla effect entries.
-- Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: a complete Normal Attack sequence that lands at least once can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
-- Adds in-game set tooltip support with Alt details, while suppressing the large set tooltip during combat.
-- Supports CN/CNH/EN/KO in-game text at game startup, with English fallback for unknown languages.
-- Adds five independent strength sliders (10%–300%, step 10%): four individual arts and the four-piece bonus. All default to 100%; restart after changes.
-- Adds per-character growth using the same algorithm for Taiwu and NPCs, with configurable Consummate, reincarnation, lifespan-relative age and learned-skill weights.
-- Adds an NPC Blood-Rift and Normal Attack bonus toggle, enabled by default, and an optional rate-limited debug logging toggle.
+- 将四门无门无派低阶功法改造为神阶一品核心功法，并保留低阶学习、运功和突破负担。
+- 同时运功四诀可获得套装加成。
+- 万噬血隙拳可通过完整普通攻击累积血隙并触发必中、必重创追击，追击不触发反震。
+- 支持按使用者分别计算成长倍率，成长来源包括精纯、轮回、年龄与寿命比例、已学功法。
+- 太吾与 NPC 使用同一套功法效果和成长算法，可配置 NPC 血隙与套装普攻加成。
+- 支持强度滑条、可选调试日志和限流诊断。
+- 游戏内文本支持 `CN/CNH/EN/KO`，未知语言回退中文。
 
-## Strength Settings
+## 强度与成长设置
 
-Open this mod's detailed settings in the game's mod manager. Set each art and the set bonus independently; 100% preserves the previous balance. The sliders adjust numerical benefits, not exact final damage. Costs, requirements, durations, stack limits and core effect rules are retained. Changes take effect after a full restart, and tooltips display the active values.
+在游戏 MOD 管理中打开「详细设置」。四项单诀与套装可分别调整，默认强度均为 100。强度调整的是对应收益，不是最终伤害倍率；消耗、要求、持续时间、层数上限和核心判定规则保持不变。修改后需要完整重启游戏。
 
-For example, Blood-Rift at 50% has a 10% base trigger chance and +75% pursuit power per stack. Keeping the set slider at 100% retains the set's +100% Normal Attack power bonus. Fractional injury recovery is resolved probabilistically; other integer bonuses round to the nearest integer.
+成长模式开启时，实际强度为「强度」页数值乘以成长倍率。年龄按寿命曲线变化，在寿命中点达到峰值后逐渐衰减；其他成长项按各自权重累计。血隙强度为 50 时，基础触发率为 10%，每层追击威力为 +75%。
 
-Scope and verification: [strength settings notes](docs/STRENGTH-SETTINGS.zh-CN.md). Existing player settings are preserved during local deployment; an older empty settings file uses the new 100% defaults.
+范围与验证见 [强度设置说明](docs/STRENGTH-SETTINGS.zh-CN.md)。本地部署保留玩家现有设置，旧的空设置文件使用默认值。
 
-## Repository Layout
+## 目录结构
 
 ```text
-src/
-  CoreSkillGrowth.Backend/    Backend Harmony patches and combat logic
-  CoreSkillGrowth.Frontend/   Frontend UI tooltip patches
-  CoreSkillGrowth.Shared/     Shared combat-skill config patching
-dist/
-  Config.Lua                  Taiwu mod metadata used by the uploader
-  Settings.Lua                Default mod settings
-  Plugins/                    Build output folder
-  *.jpg                       Cover and workshop image assets
+src/          C# 工程与源码
+tools/        构建、验证和发布脚本
+docs/         开发与维护文档
+deploy/       发布配置、默认设置模板和展示资源
+.tmpbuild/    本机构建输出，不进入 Git
+.tmpdeploy/   发布候选暂存，不进入 Git
+.decompiled/  本地接口快照，不随 MOD 发布
 ```
 
-## Build Requirements
+历史备份保存在源码树外的受控归档位置，不覆盖旧版本。
 
-- The Scroll of Taiwu installed locally.
-- .NET SDK 8.0 or newer.
-- Windows is recommended, because the project references local Taiwu assemblies.
+## 构建
 
-By default, the project looks for the game at:
+需要本机安装《太吾绘卷》和 .NET SDK 8.0 或更高版本。工程默认从以下位置读取游戏程序集：
 
 ```text
 C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu
 ```
 
-If your game is installed elsewhere, pass `GameDir` explicitly:
+游戏安装在其他位置时，通过 `GameDir` 显式传入：
 
 ```powershell
-dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj -p:GameDir="D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu"
-dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj -p:GameDir="D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu"
+dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj -c Release -p:GameDir="D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu"
+dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj -c Release -p:GameDir="D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu"
 ```
 
-Or set the environment variable `TAIWU_GAME_DIR` before building.
+也可以在构建前设置 `TAIWU_GAME_DIR`。
 
-Build outputs are written to:
+构建输出位于 `.tmpbuild/<Configuration>/Plugins/`。Debug 仅用于离线检查，不部署到游戏目录。
 
-```text
-dist/Plugins/
-```
+## 发布流程
 
-## Release Workflow
+1. 更新 `deploy/Config.Lua` 的版本、支持游戏版本及保留介绍中的对应版本字段。
+2. 保留工坊现有标题、介绍、详情图顺序和默认英文元数据，不用本地中文介绍覆盖。
+3. 构建前后端 Release。
+4. 从 Release 输出和 `deploy` 资源在 `.tmpdeploy` 组装候选包。
+5. 候选包只使用默认 `deploy/Settings.Lua` 模板，不包含玩家修改后的本机设置。
+6. 校验候选包内容、目录结构和 SHA-256 后，再通过游戏内 MOD 管理上传。
 
-1. Update `dist/Config.Lua`:
-   - top-level `Version`
-   - top-level `GameVersion`
-   - version fields inside the preserved workshop description text
-2. Preserve workshop-facing metadata:
-   - Read the current English Steam Workshop page before editing `Title` or `Description`.
-   - Keep the default workshop metadata in English.
-   - Do not replace the default English `Title` or `Description` with the Simplified Chinese page text.
-3. Keep `DetailImageList = { }` unless the workshop detail-image order intentionally needs to be replaced.
-4. Before uploading, confirm the local game/workshop `Config.Lua` upload source still has the default English `Title` and `Description`; the in-game manager can rewrite it to Chinese after an upload, and uploading from that file will overwrite the Steam English page.
-5. Write Steam Change Notes as `[h1]Title[/h1]` followed by `*` bullet lines; do not use `[list]` or `[*]`.
-6. Build both projects.
-7. Sync `dist/Config.Lua`, `dist/Settings.Lua`, `dist/Plugins/`, and required image assets to:
+## 本地开发与线上目录
 
-```text
-C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu\Mod\XuanShuFourArts
-```
+- 本仓库所在工作副本是唯一的源码、差异和提交依据，所有修改必须先在 `src`、`tools`、`docs` 或 `deploy` 中完成。
+- `SteamLibrary\steamapps\workshop\content\838350` 只用于拉取线上版本，不用于测试部署、维护源码或生成提交。
+- 本机测试统一部署到 `The Scroll Of Taiwu\Mod\XuanShuFourArts`，先构建再部署，不从该目录反向维护源码。
+- 本地开发版与工坊订阅版不得同时启用。
+- 历史 ZIP 保存在 `E:\Work\VibeCoding\TaiWuDev\Archives`，不覆盖旧版本。
 
-8. Upload through the in-game mod manager.
+## 兼容性说明
 
-## Compatibility Notes
+- 修改沛然决、小纵跃功、水火引气功、太祖长拳的 MOD 可能与本 MOD 冲突。
+- 修改相关功法表、特效表、战斗结算或提示界面的 MOD 也可能存在兼容问题。
+- 突破兼容只提供最低保障，不覆盖其他 MOD 提供的更高成功率。
+- 切换游戏语言后需要完整重启游戏。
 
-- This mod patches the four base sectless martial arts: Chant of Abundance, Minute Leap, Yin-Yang Iron Skin, and Emperor Long Fist.
-- It may conflict with other mods that modify these martial arts, related combat-skill data tables, effect tables, or display logic.
-- Breakthrough compatibility uses minimum safeguards and should not override stronger success-rate changes from other mods.
-- After changing the game language, fully exit and restart the game.
+## 许可
 
-## License
-
-The source code is licensed under the MIT License. See [LICENSE](LICENSE).
-
-Image assets and third-party game assets are not covered by the MIT License unless explicitly stated. See [ASSET_LICENSE.md](ASSET_LICENSE.md).
+源码采用 MIT License，见 [LICENSE](LICENSE)。图片及第三方游戏资源不包含在该许可内，见 [ASSET_LICENSE.md](ASSET_LICENSE.md)。
