@@ -36,7 +36,7 @@ deploy/                       发布配置、默认设置模板和展示资源
 
 ## 启动流程
 
-两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取强度、成长、NPC 效果与调试设置并冻结本次启动快照。设置界面声明需要重启；当前会话不热改配置和缓存。
+两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取强度、成长、NPC 效果与调试设置并冻结本次启动快照。设置界面声明需要重启；当前会话不热改 MOD 设置。语言切换使用独立路径：前端在 `UiEvents.OnLanguageChange` 后重应用配置并刷新相关缓存，后端在 `ReloadAllConfigData` 完成后重应用配置。
 
 1.1.0 的成长模型采用“共享基准配置＋按使用者运行时调整”：配置只保存强度滑条对应的基准值，成长算法集中在 `GrowthSettings`，各消费补丁根据 `Character`、`CombatSkillKey.CharId` 或 `CombatContext` 分别计算太吾与 NPC 的倍率。伤害步进、内力等字段也在带角色上下文的消费点处理，不按太吾倍率重写全局配置。
 

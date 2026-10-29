@@ -11,12 +11,16 @@ namespace XuanShuFourArts.Frontend;
 internal static class GrowthLocalization
 {
     private static string _targetModId;
+    private static string _originalDescription;
+    private static List<string> _originalGroups;
 
     internal static void Apply(string modIdStr)
     {
         if (ModManager.LocalMods.TryGetValue(modIdStr, out ModInfoWithDisplayData modInfo))
         {
             _targetModId = modInfo.ModId.ToString();
+            _originalDescription = modInfo.Description;
+            _originalGroups = modInfo.ModSettingGroups == null ? null : new List<string>(modInfo.ModSettingGroups);
             ApplyToModInfo(modInfo);
         }
     }
@@ -52,7 +56,7 @@ internal static class GrowthLocalization
             {
                 for (int i = 0; i < modInfo.ModSettingGroups.Count; i++)
                 {
-                    string group = modInfo.ModSettingGroups[i];
+                    string group = _originalGroups != null && i < _originalGroups.Count ? _originalGroups[i] : modInfo.ModSettingGroups[i];
                     if (group == "强度 / Strength" || group == "强度" || group == "Strength")
                     {
                         modInfo.ModSettingGroups[i] = strengthGroup;
@@ -69,7 +73,7 @@ internal static class GrowthLocalization
             }
 
             modInfo.Title = ModLanguage.SelectCurrent("玄枢四诀", "Four Arts of the Mystic Pivot", "현추사결", "Four Arts of the Mystic Pivot");
-            modInfo.Description = ModLanguage.SelectCurrent(GrowthModDescription.Chinese, modInfo.Description, GrowthModDescription.Korean, modInfo.Description);
+            modInfo.Description = ModLanguage.SelectCurrent(GrowthModDescription.Chinese, _originalDescription, GrowthModDescription.Korean, _originalDescription);
             string firstName = modInfo.ModSettingEntries.Count > 0 ? modInfo.ModSettingEntries[0].DisplayName : string.Empty;
             ModLog.Info($"[XuanShuFourArts] settings localization applied. Language={language} Entries={modInfo.ModSettingEntries.Count} First={firstName}");
         }
