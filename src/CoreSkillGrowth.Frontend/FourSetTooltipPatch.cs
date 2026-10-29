@@ -940,6 +940,9 @@ internal static class FourSetNewTooltipCombatSkillPatch
         {
             _floatingPanelRect.gameObject.SetActive(false);
         }
+        _lastTooltip = null;
+        _lastSkillId = -2;
+        _lastRevision = -1;
     }
 
     private static void SetHintVisible(TextMeshProUGUI hint, bool visible)
