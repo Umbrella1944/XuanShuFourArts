@@ -4,8 +4,8 @@ Use this checklist before every workshop update.
 
 ## Version Metadata
 
-- Update `dist/Config.Lua` top-level `Version`.
-- Update `dist/Config.Lua` top-level `GameVersion`.
+- Update `deploy/Config.Lua` top-level `Version`.
+- Update `deploy/Config.Lua` top-level `GameVersion`.
 - The author alone edits Workshop introduction text. Automated maintenance may update version numbers only; do not insert release notes, shorten, rewrite, or reorganize the introduction. Synchronize author-edited live text verbatim when updating the repository.
 - Before changing workshop-facing metadata, read the current Steam metadata first and use the English/default metadata as the source:
   - Preferred raw metadata API: `https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/` with `publishedfileids[0]=3747599301`
@@ -19,7 +19,7 @@ Use this checklist before every workshop update.
 - Before every upload, check the local upload source file:
   - `C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu\Mod\XuanShuFourArts\Config.Lua`
   - `C:\Program Files (x86)\Steam\steamapps\workshop\content\838350\3747599301\Config.Lua`
-- These local `Config.Lua` files must keep the default `Title` and `Description` in English. If the in-game mod manager rewrites them into Chinese after an upload, re-read the current author-edited English/default Workshop text before restoring it. Never overwrite newer author edits with an older `dist/Config.Lua`.
+- These local `Config.Lua` files must keep the default `Title` and `Description` in English. If the in-game mod manager rewrites them into Chinese after an upload, re-read the current author-edited English/default Workshop text before restoring it. Never overwrite newer author edits with an older `deploy/Config.Lua`.
 - Check the decoded description's UTF-8 byte length against Steam's 8,000-byte limit. If it is too long, report the measured length to the author; do not shorten the text automatically.
 - Do not upload from a Chinese-rewritten local `Config.Lua`; that will overwrite the Steam default/English workshop page with Chinese.
 - Update `README.md` current release block.
@@ -56,32 +56,26 @@ Use this checklist before every workshop update.
 ## Build
 
 ```powershell
-dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj
-dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj
+dotnet build src/CoreSkillGrowth.Backend/CoreSkillGrowth.Backend.csproj -c Release
+dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj -c Release
 ```
 
 Both builds should finish with 0 errors.
 
 ## Sync To Game Mod Folder
 
-Sync release files to:
-
-```text
-C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu\Mod\XuanShuFourArts
-```
+Assemble the release candidate in `.tmpdeploy` from `.tmpbuild/Release/Plugins` and `deploy` resources. Include the default `deploy/Settings.Lua` template, but do not include a player's modified local settings.
 
 Required files:
 
-- `dist/Config.Lua`
-- `dist/Settings.Lua`
-- `dist/Plugins/XuanShuFourArtsB.dll`
-- `dist/Plugins/XuanShuFourArtsF.dll`
-- `dist/Plugins/XuanShuFourArtsB.deps.json`
+- `deploy/Config.Lua`
+- `deploy/Settings.Lua`
+- Release `XuanShuFourArtsB.dll`, `XuanShuFourArtsF.dll` and `XuanShuFourArtsB.deps.json`
 - required cover image assets
 
 ## Sanity Check
 
 - Open the in-game upload screen.
-- Confirm mod version and supported game version match `dist/Config.Lua`.
+- Confirm mod version and supported game version match `deploy/Config.Lua`.
 - Confirm current game version is compatible.
 - Confirm workshop detail images have not been replaced or reordered.

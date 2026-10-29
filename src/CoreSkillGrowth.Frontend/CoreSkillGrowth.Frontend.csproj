@@ -7,11 +7,13 @@
     <ImplicitUsings>false</ImplicitUsings>
     <Nullable>disable</Nullable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
+    <DebugType Condition="'$(Configuration)' != 'Release'">portable</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' != 'Release'">true</DebugSymbols>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>..\..\dist\Plugins\</OutputPath>
+    <OutputPath>..\..\.tmpbuild\$(Configuration)\Plugins\</OutputPath>
     <GameDir Condition="'$(GameDir)' == '' and '$(TAIWU_GAME_DIR)' != ''">$(TAIWU_GAME_DIR)</GameDir>
     <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\The Scroll Of Taiwu</GameDir>
     <ManagedDir>$(GameDir)\The Scroll of Taiwu_Data\Managed</ManagedDir>
@@ -20,7 +22,11 @@
   <ItemGroup>
     <Compile Include="FrontendPlugin.cs" />
     <Compile Include="FourSetTooltipPatch.cs" />
+    <Compile Include="GrowthLocalization.cs" />
     <Compile Include="..\CoreSkillGrowth.Shared\CoreSkillGrowthConfigPatch.cs" Link="CoreSkillGrowthConfigPatch.cs" />
+    <Compile Include="..\CoreSkillGrowth.Shared\GrowthSettings.cs" Link="GrowthSettings.cs" />
+    <Compile Include="..\CoreSkillGrowth.Shared\ModLog.cs" Link="ModLog.cs" />
+    <Compile Include="..\CoreSkillGrowth.Shared\ModLanguage.cs" Link="ModLanguage.cs" />
     <Compile Include="..\CoreSkillGrowth.Shared\StrengthSettings.cs" Link="StrengthSettings.cs" />
   </ItemGroup>
 

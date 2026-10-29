@@ -33,8 +33,10 @@ internal static class DecoupledCoreSkillEffects
         }
 
         int availableUnits = defender.GetMobilityValue() * 100 / MoveSpecialConstants.MaxMobility + 1;
+        int shadowStepPercent = GrowthSettings.ScaleByFactor(
+            StrengthSettings.ShadowStep, GrowthSettings.FactorForCharacter(defender.GetId()));
         int damageUnit = Math.Max(StrengthSettings.Scale(
-            Math.Max(defender.GetDamageStepCollection().FatalDamageStep / 10, 1), StrengthSettings.ShadowStep), 1);
+            Math.Max(defender.GetDamageStepCollection().FatalDamageStep / 10, 1), shadowStepPercent), 1);
         int consumedUnits = Math.Min(damageValue / damageUnit, availableUnits);
         int mobilityCost = -MoveSpecialConstants.MaxMobility * consumedUnits / 100;
 
@@ -44,7 +46,7 @@ internal static class DecoupledCoreSkillEffects
         }
 
         ShowEffectTip(defender, CoreSkillGrowthConfigPatch.XiaoZongEffectId);
-        return damageUnit * (damageValue / damageUnit - consumedUnits);
+        return damageValue - damageUnit * consumedUnits;
     }
 
     internal static void ApplyShuiHuoInjuryRedistribution(DataContext context, CombatCharacter combatChar)
@@ -59,8 +61,11 @@ internal static class DecoupledCoreSkillEffects
         Injuries injuries = combatChar.GetInjuries();
         Injuries oldInjuries = combatChar.GetOldInjuries();
         // Preserve the old random sequence at the default/integer multipliers.
+        int formRestoringPercent = GrowthSettings.ScaleByFactor(
+            StrengthSettings.FormRestoring, GrowthSettings.FactorForCharacter(combatChar.GetId()));
         int healingCount = StrengthSettings.InjuryRecoveryCount(
-            StrengthSettings.FormRestoring % 100 == 0 ? 100 : context.Random.Next(100));
+            formRestoringPercent % 100 == 0 ? 100 : context.Random.Next(100),
+            formRestoringPercent);
 
         for (sbyte bodyPart = 0; bodyPart < 7; bodyPart++)
         {
@@ -194,7 +199,7 @@ internal static class XiaoZongDirectDamagePatch
             return true;
         }
 
-        Console.WriteLine("[XuanShuFourArts] XiaoZong DR damage conversion skipped: CalcSingleInjury target not found.");
+        ModLog.Warn("[XuanShuFourArts] XiaoZong DR damage conversion skipped: CalcSingleInjury target not found.");
         return false;
     }
 
@@ -244,7 +249,7 @@ internal static class XiaoZongDirectDamagePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] XiaoZong DR damage conversion failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] XiaoZong DR damage conversion failed: {ex}");
         }
     }
 }
@@ -271,7 +276,7 @@ internal static class ShuiHuoDefendEndPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] ShuiHuo DR injury redistribution failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] ShuiHuo DR injury redistribution failed: {ex}");
         }
     }
 }

@@ -57,8 +57,12 @@ internal static class PeiRanAutoHealRuntime
         }
 
         state.DisabledForThisTick = false;
+        int charId = combatChar.GetId();
+        int factor = GrowthSettings.FactorForCharacter(charId);
         short speed = StrengthSettings.NextHealSpeed(ref state.HealProgress,
-            FourSetActiveSkillBonus.HasFullSetEquipped(combatChar.GetId()));
+            FourSetActiveSkillBonus.HasFullSetEquipped(charId),
+            GrowthSettings.ScaleByFactor(StrengthSettings.ReturningFrame, factor),
+            GrowthSettings.ScaleByFactor(StrengthSettings.FourPiece, factor));
         EnsureSpeed(combatChar, state, speed);
         state.DisabledForThisTick = speed != ActiveSpeed;
     }
@@ -140,7 +144,7 @@ internal static class PeiRanCombatBeginPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed to register PeiRan DR auto-heal: {ex}");
+            ModLog.Error($"[XuanShuFourArts] failed to register PeiRan DR auto-heal: {ex}");
         }
     }
 }
@@ -180,7 +184,7 @@ internal static class PeiRanAutoHealUpdatePatch
             return true;
         }
 
-        Console.WriteLine("[XuanShuFourArts] PeiRan DR auto-heal patch skipped: TimeUpdateAutoHeal target not found.");
+        ModLog.Warn("[XuanShuFourArts] PeiRan DR auto-heal patch skipped: TimeUpdateAutoHeal target not found.");
         return false;
     }
 
@@ -193,7 +197,7 @@ internal static class PeiRanAutoHealUpdatePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed before PeiRan DR auto-heal update: {ex}");
+            ModLog.Error($"[XuanShuFourArts] failed before PeiRan DR auto-heal update: {ex}");
         }
     }
 
@@ -206,7 +210,7 @@ internal static class PeiRanAutoHealUpdatePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] failed after PeiRan DR auto-heal update: {ex}");
+            ModLog.Error($"[XuanShuFourArts] failed after PeiRan DR auto-heal update: {ex}");
         }
     }
 }

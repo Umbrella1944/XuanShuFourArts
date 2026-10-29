@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0.0
+
+- Added per-character growth driven by Consummate, reincarnations, lifespan-relative age and learned combat skills.
+- Kept shared skill configuration at slider strength and applied growth at each wielder's runtime consumers, including Practice, active values, damage steps, recovery and Inner Qi gains.
+- Added an NPC Blood-Rift and Normal Attack bonus toggle, enabled by default; Taiwu and NPCs use the same effects and growth algorithm.
+- Fixed Stamina damage conversion discarding non-integer damage remainders.
+- Added rate-limited diagnostics and an optional debug logging toggle; separated Debug and Release build outputs.
+- Added tooltip lifecycle cleanup and state-based refresh to reduce repeated layout work.
+- Added Korean localization for settings, arts, effects, tooltips and mod details; CNH uses Traditional Chinese and unknown languages fall back to Chinese.
+- Reapplied skill configuration after frontend and backend language reloads, preserving all four arts during runtime language switches.
+
 ## 1.0.3.0
 
 - Added independent strength settings for all four arts and the four-piece set bonus, from 10% to 300% in 10% steps; all defaults remain 100%.

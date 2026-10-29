@@ -16,16 +16,16 @@
 ## 目录结构
 
 ```text
-src/
-  CoreSkillGrowth.Backend/    后端 Harmony Patch，负责战斗逻辑和数值生效
-  CoreSkillGrowth.Frontend/   前端 Harmony Patch，负责 UI 和鼠标提示
-  CoreSkillGrowth.Shared/     前后端共用的功法配置修改
-dist/
-  Config.Lua                  游戏 MOD 配置和创意工坊描述
-  Settings.Lua                默认设置
-  Plugins/                    本地构建输出目录，不提交到 Git
-  *.jpg                       封面和宣传图片
+src/                          C# 工程和源码
+tools/                        构建、验证和发布脚本
+docs/                         开发与维护文档
+deploy/                       发布配置、默认设置模板和展示资源
+.tmpbuild/                    本机构建输出，不提交到 Git
+.tmpdeploy/                   发布候选暂存，不提交到 Git
+.decompiled/                  本地接口快照，不随 MOD 发布
 ```
+
+历史 ZIP 保存在源码树外的受控归档位置，不覆盖旧版本。
 
 `Backend` 和 `Frontend` 是两个独立插件，分别生成：
 
@@ -36,7 +36,9 @@ dist/
 
 ## 启动流程
 
-1.0.3.0 新增共享 `StrengthSettings`：两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取五项百分比并冻结本次启动快照。设置界面声明需要重启；当前会话不热改配置和缓存。完整范围及验证见 [强度设置说明](STRENGTH-SETTINGS.zh-CN.md)。
+两端 Initialize 在修改配置及安装补丁前，通过各自原生 GetSetting 读取强度、成长、NPC 效果与调试设置并冻结本次启动快照。设置界面声明需要重启；当前会话不热改 MOD 设置。语言切换使用独立路径：前端在 `UiEvents.OnLanguageChange` 后重应用配置并刷新相关缓存，后端在 `ReloadAllConfigData` 完成后重应用配置。
+
+1.1.0 的成长模型采用“共享基准配置＋按使用者运行时调整”：配置只保存强度滑条对应的基准值，成长算法集中在 `GrowthSettings`，各消费补丁根据 `Character`、`CombatSkillKey.CharId` 或 `CombatContext` 分别计算太吾与 NPC 的倍率。伤害步进、内力等字段也在带角色上下文的消费点处理，不按太吾倍率重写全局配置。
 
 两个插件入口分别是：
 
@@ -232,14 +234,14 @@ UI 只负责显示，不负责后端数值生效。
 
 发布前至少检查：
 
-- `dist/Config.Lua` 里的 `Version`
-- `dist/Config.Lua` 里的 `GameVersion`
+- `deploy/Config.Lua` 里的 `Version`
+- `deploy/Config.Lua` 里的 `GameVersion`
 - 创意工坊描述中的版本号
 - `DetailImageList = { }` 是否保持为空
 - 前后端 DLL 是否重新构建并同步到游戏 MOD 目录
 - 游戏内是否能正常加载并进入战斗
 
-不要把 `dist/Plugins/*.dll` 提交到 Git 仓库。它们是本地构建产物，不是源码。
+不要把 `.tmpbuild/Release/Plugins/*.dll` 提交到 Git 仓库。它们是本地构建产物，不是源码。
 
 ## 给普通 MOD 作者的阅读顺序
 

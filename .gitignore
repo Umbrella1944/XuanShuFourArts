@@ -31,9 +31,13 @@ maintenance/
 *.overwritten-backup-*
 Config.Lua.overwritten-backup-*
 
-# Build outputs generated into the release folder
-dist/Plugins/*.dll
-dist/Plugins/*.deps.json
+# Local work areas
+.decompiled/
+.tmpdeploy/
+.tmpbuild/
+.e2e-backup/
+.e2e-results/
+Archives/
 
 # OS noise
 Thumbs.db

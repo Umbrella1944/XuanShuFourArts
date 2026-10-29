@@ -39,14 +39,27 @@ internal sealed class BloodRiftCombatState
 
 internal static class BloodRiftPursuitRuntime
 {
-    private static readonly bool BloodRiftTestMode = false;
-    private static int BaseChancePercent => StrengthSettings.BloodRiftChance;
     private const int PityStartFailures = 4;
-    private static int PityStepPercent => StrengthSettings.SetPityStep;
     private const int PityMaxChancePercent = 100;
     private const int TriggerStacks = 2;
     private const int MaxStacks = 10;
-    private static int PursuitPowerPercentPerStack => StrengthSettings.BloodRiftPowerPerStack;
+
+    // Growth-scaled per wielder: the slider value is the base, the wielder's
+    // growth factor scales it at the moment of use.
+    private static int ChanceFor(int charId)
+    {
+        return Math.Min(100, GrowthSettings.ScaleByFactor(StrengthSettings.BloodRiftChance, GrowthSettings.FactorForCharacter(charId)));
+    }
+
+    private static int PityStepFor(int charId)
+    {
+        return GrowthSettings.ScaleByFactor(StrengthSettings.SetPityStep, GrowthSettings.FactorForCharacter(charId));
+    }
+
+    private static int PursuitPowerPerStackFor(int charId)
+    {
+        return GrowthSettings.ScaleByFactor(StrengthSettings.BloodRiftPowerPerStack, GrowthSettings.FactorForCharacter(charId));
+    }
 
     private static readonly Dictionary<int, BloodRiftCombatState> CombatStates = new Dictionary<int, BloodRiftCombatState>();
 
@@ -91,7 +104,7 @@ internal static class BloodRiftPursuitRuntime
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit begin failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] Blood-Rift pursuit begin failed: {ex}");
         }
     }
 
@@ -121,7 +134,7 @@ internal static class BloodRiftPursuitRuntime
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit hit record failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] Blood-Rift pursuit hit record failed: {ex}");
         }
     }
 
@@ -151,7 +164,7 @@ internal static class BloodRiftPursuitRuntime
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit record reset failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] Blood-Rift pursuit record reset failed: {ex}");
         }
     }
 
@@ -193,8 +206,10 @@ internal static class BloodRiftPursuitRuntime
 
             state.ResetNormalAttackRecord();
             bool fullSet = FourSetActiveSkillBonus.HasFullSetEquipped(attacker.GetId());
-            int chance = CalcChance(state, fullSet);
-            if (!RollPercent(context, chance))
+            int chance = CalcChance(state, fullSet, attacker.GetId());
+            bool triggered = RollPercent(context, chance);
+            ModLog.Debug($"Blood-Rift char={attacker.GetId()} chance={chance} triggered={triggered} failures={state.FailureCount}");
+            if (!triggered)
             {
                 if (fullSet)
                 {
@@ -226,7 +241,7 @@ internal static class BloodRiftPursuitRuntime
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursuit queue failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] Blood-Rift pursuit queue failed: {ex}");
         }
     }
 
@@ -275,8 +290,7 @@ internal static class BloodRiftPursuitRuntime
         CombatCharacter attacker = context.Attacker;
         if (attacker == null ||
             attacker.NormalAttackHitType < 0 ||
-            !attacker.IsAlly ||
-            !DomainManager.Combat.IsMainCharacter(attacker) ||
+            !IsEligibleWielder(attacker) ||
             !FourSetActiveSkillBonus.HasFullSetEquipped(attacker.GetId()))
         {
             return false;
@@ -287,9 +301,10 @@ internal static class BloodRiftPursuitRuntime
             character.IsCombatSkillEquipped(CoreSkillGrowthConfigPatch.TaiZuChangQuan);
     }
 
-    internal static void AmplifyNormalAttackPower(ref int power)
+    internal static void AmplifyNormalAttackPower(int charId, ref int power)
     {
-        power = StrengthSettings.Amplify(power, StrengthSettings.SetNormalAttackBonus);
+        int bonus = GrowthSettings.ScaleByFactor(StrengthSettings.SetNormalAttackBonus, GrowthSettings.FactorForCharacter(charId));
+        power = StrengthSettings.Amplify(power, bonus);
     }
 
     internal static void AmplifyBloodRiftPursuitPower(CombatContext context, ref int power)
@@ -302,7 +317,7 @@ internal static class BloodRiftPursuitRuntime
             return;
         }
 
-        int bonusPercent = state.FreeAttackSnapshotStacks * PursuitPowerPercentPerStack;
+        int bonusPercent = state.FreeAttackSnapshotStacks * PursuitPowerPerStackFor(attacker.GetId());
         power = StrengthSettings.Amplify(power, bonusPercent);
         if (!state.FreeAttackDamageSettled)
         {
@@ -310,6 +325,12 @@ internal static class BloodRiftPursuitRuntime
             state.FreeAttackDamageSettled = true;
             ShowBloodRiftTip(attacker, 2);
         }
+    }
+
+    private static bool IsEligibleWielder(CombatCharacter attacker)
+    {
+        return StrengthSettings.NpcBloodRiftEnabled ||
+            attacker.GetId() == DomainManager.Taiwu.GetTaiwuCharId();
     }
 
     private static bool CanRollPursuit(
@@ -324,8 +345,7 @@ internal static class BloodRiftPursuitRuntime
             isFightBack ||
             attacker.IsAutoNormalAttackingSpecial ||
             !IsInNormalAttackState(attacker, CombatCharacterStateType.Attack) ||
-            !attacker.IsAlly ||
-            !DomainManager.Combat.IsMainCharacter(attacker) ||
+            !IsEligibleWielder(attacker) ||
             !DomainManager.Combat.IsInCombat())
         {
             return false;
@@ -354,8 +374,7 @@ internal static class BloodRiftPursuitRuntime
     {
         if (combatChar == null ||
             !DomainManager.Combat.IsInCombat() ||
-            !combatChar.IsAlly ||
-            !DomainManager.Combat.IsMainCharacter(combatChar) ||
+            !IsEligibleWielder(combatChar) ||
             combatChar.GetIsFightBack() ||
             !IsInNormalAttackState(combatChar, CombatCharacterStateType.PrepareAttack) ||
             combatChar.IsAutoNormalAttacking ||
@@ -388,22 +407,17 @@ internal static class BloodRiftPursuitRuntime
         return state;
     }
 
-    private static int CalcChance(BloodRiftCombatState state, bool fullSet)
+    private static int CalcChance(BloodRiftCombatState state, bool fullSet, int charId)
     {
-        if (BloodRiftTestMode)
-        {
-            return 100;
-        }
-
         if (!fullSet)
         {
-            return BaseChancePercent;
+            return ChanceFor(charId);
         }
 
         int extra = state.FailureCount >= PityStartFailures
-            ? (state.FailureCount - PityStartFailures + 1) * PityStepPercent
+            ? (state.FailureCount - PityStartFailures + 1) * PityStepFor(charId)
             : 0;
-        return Math.Min(BaseChancePercent + extra, PityMaxChancePercent);
+        return Math.Min(ChanceFor(charId) + extra, PityMaxChancePercent);
     }
 
     private static void LoseStack(BloodRiftCombatState state)
@@ -575,7 +589,7 @@ internal static class BloodRiftCanPursuePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] Blood-Rift pursue patch failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] Blood-Rift pursue patch failed: {ex}");
             return true;
         }
     }
@@ -657,7 +671,7 @@ internal static class BloodRiftPursuitHitPatch
             return true;
         }
 
-        Console.WriteLine("[XuanShuFourArts] Blood-Rift hit patch skipped: ApplyHitOddsSpecialEffect target not found.");
+        ModLog.Warn("[XuanShuFourArts] Blood-Rift hit patch skipped: ApplyHitOddsSpecialEffect target not found.");
         return false;
     }
 
@@ -703,7 +717,7 @@ internal static class BloodRiftNormalAttackPowerPatch
             return true;
         }
 
-        Console.WriteLine("[XuanShuFourArts] Blood-Rift power patch skipped: CalcAndAddInjury target not found.");
+        ModLog.Warn("[XuanShuFourArts] Blood-Rift power patch skipped: CalcAndAddInjury target not found.");
         return false;
     }
 
@@ -712,7 +726,7 @@ internal static class BloodRiftNormalAttackPowerPatch
     {
         if (BloodRiftPursuitRuntime.ShouldAmplifyNormalAttack(context))
         {
-            BloodRiftPursuitRuntime.AmplifyNormalAttackPower(ref power);
+            BloodRiftPursuitRuntime.AmplifyNormalAttackPower(context.Attacker.GetId(), ref power);
         }
 
         BloodRiftPursuitRuntime.AmplifyBloodRiftPursuitPower(context, ref power);

@@ -19,6 +19,14 @@ internal static class FourSetUiState
     private const string Marker = "<!--XuanShuFourArtsSet-->";
     private static int _currentCount = -1;
 
+    internal static int Revision { get; private set; }
+
+    internal static void Reset()
+    {
+        _currentCount = -1;
+        Revision++;
+    }
+
     internal static void UpdateFrom(ICollection<short> equippedSkills)
     {
         int count = 0;
@@ -45,7 +53,11 @@ internal static class FourSetUiState
             }
         }
 
-        _currentCount = count;
+        if (_currentCount != count)
+        {
+            _currentCount = count;
+            Revision++;
+        }
     }
 
     internal static void UpdateFromPlans(IEnumerable<ICollection<short>> equippedSkillPlans)
@@ -85,11 +97,15 @@ internal static class FourSetUiState
         string color = _currentCount >= 4 ? "#D8C06A" : "#8A8F8A";
         bool detailMode = IsDetailMode();
         int displayCount = Math.Max(0, _currentCount);
+        string language = ModLanguage.Current;
 
-        bool english = IsEnglishLanguage();
-        title = english ? $"Mystic Pivot Four Arts {displayCount}/4" : $"玄枢四诀 {displayCount}/4";
-        desc = (detailMode ? (english ? "4-piece set effect\n" : "4件套装效果\n") : "") +
-            StrengthDescriptions.SetEffects(english, detailMode);
+        title = ModLanguage.SelectCurrent(
+            $"玄枢四诀 {displayCount}/4",
+            $"Mystic Pivot Four Arts {displayCount}/4",
+            $"현추사결 {displayCount}/4",
+            $"玄枢四诀 {displayCount}/4");
+        desc = (detailMode ? ModLanguage.SelectCurrent("4件套装效果\n", "4-piece set effect\n", "4종 세트 효과\n", "4点セット効果\n") : "") +
+            StrengthDescriptions.SetEffects(language, detailMode);
 
         return
             $"<color={color}><b>{title}</b></color>\n" +
@@ -105,12 +121,11 @@ internal static class FourSetUiState
     {
         int displayCount = Math.Max(0, _currentCount);
         string activeColor = _currentCount >= 4 ? "#D8C06A" : "#8A8F8A";
-
-        bool english = IsEnglishLanguage();
-        string title = english ? "Mystic Pivot Four Arts" : "玄枢四诀 套装效果";
-        string progress = english ? $"Progress: {displayCount}/4" : $"当前进度：{displayCount}/4";
+        string language = ModLanguage.Current;
+        string title = ModLanguage.SelectCurrent("玄枢四诀 套装效果", "Mystic Pivot Four Arts", "현추사결 세트 효과", "玄枢四诀 セット効果");
+        string progress = ModLanguage.SelectCurrent($"当前进度：{displayCount}/4", $"Progress: {displayCount}/4", $"진행: {displayCount}/4", $"進行：{displayCount}/4");
         return $"<color={activeColor}><b>{title}</b></color>\n{progress}\n" +
-            StrengthDescriptions.SetEffects(english, true);
+            StrengthDescriptions.SetEffects(language, true);
     }
 
     internal static string AppendSetHint(short skillId, string originalText)
@@ -134,20 +149,6 @@ internal static class FourSetUiState
         return markerIndex >= 0
             ? originalText.Substring(0, markerIndex).TrimEnd()
             : originalText;
-    }
-
-    private static bool IsEnglishLanguage()
-    {
-        try
-        {
-            string languageKey = LocalStringManager.CurLanguageKey;
-            return string.Equals(languageKey, "EN", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(languageKey, "English", StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            return false;
-        }
     }
 }
 
@@ -186,6 +187,12 @@ internal static class FourSetCombatViewState
     private static readonly HashSet<int> ActiveCombatViews = new HashSet<int>();
 
     internal static bool ShouldSuppressSetHint => ActiveCombatViews.Count > 0;
+
+    internal static void Reset()
+    {
+        ActiveCombatViews.Clear();
+        FourSetNewTooltipCombatSkillPatch.HideFloatingHint();
+    }
 
     internal static void MarkActive(ViewCombat view)
     {
@@ -258,7 +265,7 @@ internal static class FourSetNewEquipSkillCachePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set new equip cache failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set new equip cache failed: {ex}");
         }
     }
 }
@@ -298,7 +305,7 @@ internal static class FourSetEquippedSkillCachePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set UI cache failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set UI cache failed: {ex}");
         }
     }
 }
@@ -336,7 +343,7 @@ internal static class FourSetCombatSkillCachePatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set combat cache failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set combat cache failed: {ex}");
         }
     }
 }
@@ -345,6 +352,13 @@ internal static class FourSetCombatSkillCachePatch
 internal static class FourSetMouseTipPanelPatch
 {
     private const string HintNodeName = "XuanShuFourArtsSetHint";
+    private static MouseTipCombatSkill _lastTooltip;
+    private static int _lastSkillId = -2;
+    private static int _lastRevision = -1;
+    private static int _lastScreenWidth = -1;
+    private static int _lastScreenHeight = -1;
+    private static bool _lastDetail;
+    private static bool _lastSuppressed;
     private static readonly FieldInfo CombatSkillTemplateIdField =
         AccessTools.Field(typeof(MouseTipCombatSkill), "_combatSkillTemplateId");
 
@@ -353,25 +367,25 @@ internal static class FourSetMouseTipPanelPatch
     {
         try
         {
-            TextMeshProUGUI hint = FindHint(__instance);
-            if (FourSetCombatViewState.ShouldSuppressSetHint)
+            bool suppressed = FourSetCombatViewState.ShouldSuppressSetHint;
+            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(__instance));
+            bool detail = FourSetUiState.IsDetailMode();
+            int revision = FourSetUiState.Revision;
+            if (__instance == _lastTooltip && skillId == _lastSkillId && revision == _lastRevision &&
+                detail == _lastDetail && suppressed == _lastSuppressed &&
+                Screen.width == _lastScreenWidth && Screen.height == _lastScreenHeight)
             {
-                if (hint != null)
-                {
-                    hint.gameObject.SetActive(false);
-                }
-
                 return;
             }
 
-            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(__instance));
-            if (!FourSetUiState.IsSetSkill(skillId))
+            TextMeshProUGUI hint = FindHint(__instance);
+            if (suppressed || !FourSetUiState.IsSetSkill(skillId))
             {
                 if (hint != null)
                 {
                     hint.gameObject.SetActive(false);
                 }
-
+                Remember(__instance, skillId, revision, detail, suppressed);
                 return;
             }
 
@@ -384,11 +398,30 @@ internal static class FourSetMouseTipPanelPatch
             hint.text = FourSetUiState.BuildSetHint();
             ApplyHintLayout(hint);
             hint.gameObject.SetActive(true);
+            Remember(__instance, skillId, revision, detail, suppressed);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set mouse tip failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set mouse tip failed: {ex}");
         }
+    }
+
+    private static void Remember(MouseTipCombatSkill tooltip, short skillId, int revision, bool detail, bool suppressed)
+    {
+        _lastTooltip = tooltip;
+        _lastSkillId = skillId;
+        _lastRevision = revision;
+        _lastDetail = detail;
+        _lastSuppressed = suppressed;
+        _lastScreenWidth = Screen.width;
+        _lastScreenHeight = Screen.height;
+    }
+
+    internal static void ResetCache()
+    {
+        _lastTooltip = null;
+        _lastSkillId = -2;
+        _lastRevision = -1;
     }
 
     private static TextMeshProUGUI FindHint(MouseTipCombatSkill mouseTip)
@@ -577,6 +610,14 @@ internal static class FourSetNewTooltipCombatSkillPatch
     private static RectTransform _floatingPanelRect;
     private static TextMeshProUGUI _floatingHint;
     private static RectTransform _overlayCanvasRect;
+    private static TooltipCombatSkill _lastTooltip;
+    private static int _lastSkillId = -2;
+    private static int _lastRevision = -1;
+    private static int _lastScreenWidth = -1;
+    private static int _lastScreenHeight = -1;
+    private static bool _lastDetail;
+    private static bool _lastSuppressed;
+    private static readonly Vector3[] CornerBuffer = new Vector3[4];
 
     private static readonly FieldInfo CombatSkillTemplateIdField =
         AccessTools.Field(typeof(TooltipCombatSkill), "_combatSkillTemplateId");
@@ -594,19 +635,22 @@ internal static class FourSetNewTooltipCombatSkillPatch
     {
         try
         {
-            TextMeshProUGUI hint = FindHint();
-            if (FourSetCombatViewState.ShouldSuppressSetHint)
+            bool suppressed = FourSetCombatViewState.ShouldSuppressSetHint;
+            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(tooltip));
+            bool detail = FourSetUiState.IsDetailMode();
+            int revision = FourSetUiState.Revision;
+            if (tooltip == _lastTooltip && skillId == _lastSkillId && revision == _lastRevision &&
+                detail == _lastDetail && suppressed == _lastSuppressed &&
+                Screen.width == _lastScreenWidth && Screen.height == _lastScreenHeight)
             {
-                SetHintVisible(hint, false);
                 return;
             }
 
-            short skillId = Convert.ToInt16(CombatSkillTemplateIdField.GetValue(tooltip));
-            bool isSetSkill = FourSetUiState.IsSetSkill(skillId);
-            if (!isSetSkill)
+            TextMeshProUGUI hint = FindHint();
+            if (suppressed || !FourSetUiState.IsSetSkill(skillId))
             {
                 SetHintVisible(hint, false);
-
+                Remember(tooltip, skillId, revision, detail, suppressed);
                 return;
             }
 
@@ -619,11 +663,38 @@ internal static class FourSetNewTooltipCombatSkillPatch
             hint.text = FourSetUiState.BuildSetHint();
             ApplyHintLayout(tooltip, hint);
             SetHintVisible(hint, true);
+            Remember(tooltip, skillId, revision, detail, suppressed);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set new tooltip failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set new tooltip failed: {ex}");
         }
+    }
+
+    private static void Remember(TooltipCombatSkill tooltip, short skillId, int revision, bool detail, bool suppressed)
+    {
+        _lastTooltip = tooltip;
+        _lastSkillId = skillId;
+        _lastRevision = revision;
+        _lastDetail = detail;
+        _lastSuppressed = suppressed;
+        _lastScreenWidth = Screen.width;
+        _lastScreenHeight = Screen.height;
+    }
+
+    internal static void Dispose()
+    {
+        if (_overlayCanvasRect != null)
+        {
+            _overlayCanvasRect.gameObject.SetActive(false);
+            UnityEngine.Object.Destroy(_overlayCanvasRect.gameObject);
+        }
+        _floatingPanelRect = null;
+        _floatingHint = null;
+        _overlayCanvasRect = null;
+        _lastTooltip = null;
+        _lastSkillId = -2;
+        _lastRevision = -1;
     }
 
     private static TextMeshProUGUI FindHint()
@@ -800,7 +871,7 @@ internal static class FourSetNewTooltipCombatSkillPatch
             return;
         }
 
-        Vector3[] corners = new Vector3[4];
+        Vector3[] corners = CornerBuffer;
         tooltipRect.GetWorldCorners(corners);
 
         Canvas sourceCanvas = tooltip.GetComponentInParent<Canvas>();
@@ -847,17 +918,6 @@ internal static class FourSetNewTooltipCombatSkillPatch
         bool canPlaceRight = tipRight + gap + size.x <= canvasRect.rect.xMax - 16f;
         bool canPlaceLeft = tipLeft - gap - size.x >= canvasRect.rect.xMin + 16f;
         bool placeRight = canPlaceRight || !canPlaceLeft;
-        if (FourSetUiState.IsDetailMode() && canPlaceLeft)
-        {
-            // In the practice screen, the right side is usually the attribute panel
-            // players compare while holding Alt, so detailed set text avoids that area.
-            float rightAnalysisAreaStart = canvasRect.rect.xMax - canvasRect.rect.width * 0.28f;
-            bool rightPlacementBlocksAnalysisArea = tipRight + gap + size.x > rightAnalysisAreaStart;
-            if (rightPlacementBlocksAnalysisArea)
-            {
-                placeRight = false;
-            }
-        }
 
         panelRect.pivot = placeRight ? new Vector2(0f, 0.5f) : new Vector2(1f, 0.5f);
         Vector2 position = placeRight
@@ -880,6 +940,9 @@ internal static class FourSetNewTooltipCombatSkillPatch
         {
             _floatingPanelRect.gameObject.SetActive(false);
         }
+        _lastTooltip = null;
+        _lastSkillId = -2;
+        _lastRevision = -1;
     }
 
     private static void SetHintVisible(TextMeshProUGUI hint, bool visible)
@@ -933,7 +996,7 @@ internal static class FourSetCombatSkillIntroPatch
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[XuanShuFourArts] four-set intro failed: {ex}");
+            ModLog.Error($"[XuanShuFourArts] four-set intro failed: {ex}");
         }
     }
 }
