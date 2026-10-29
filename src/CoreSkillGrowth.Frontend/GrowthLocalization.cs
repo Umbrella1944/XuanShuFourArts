@@ -69,7 +69,7 @@ internal static class GrowthLocalization
             }
 
             modInfo.Title = ModLanguage.SelectCurrent("玄枢四诀", "Four Arts of the Mystic Pivot", "현추사결", "Four Arts of the Mystic Pivot");
-            modInfo.Description = ModLanguage.SelectCurrent(GrowthModDescription.Chinese, modInfo.Description, modInfo.Description, modInfo.Description);
+            modInfo.Description = ModLanguage.SelectCurrent(GrowthModDescription.Chinese, modInfo.Description, GrowthModDescription.Korean, modInfo.Description);
             string firstName = modInfo.ModSettingEntries.Count > 0 ? modInfo.ModSettingEntries[0].DisplayName : string.Empty;
             ModLog.Info($"[XuanShuFourArts] settings localization applied. Language={language} Entries={modInfo.ModSettingEntries.Count} First={firstName}");
         }
@@ -172,6 +172,106 @@ https://github.com/Umbrella1944/XuanShuFourArts
 感谢你的支持。
 
 我还制作了一个前置框架 MOD，供计划开发的 NPC 活动 MOD 使用，欢迎尝试：
+Taiwu Interaction Framework
+https://steamcommunity.com/sharedfiles/filedetails/?id=3749605687
+
+Taiwu Save Repair
+https://steamcommunity.com/sharedfiles/filedetails/?id=3751322965
+
+Taiwu English Localization Fixes
+https://steamcommunity.com/sharedfiles/filedetails/?id=3750166478
+";
+
+    internal static readonly string Korean = @"현추사결
+
+제작: Umbrella
+게임: The Scroll of Taiwu
+MOD 버전: 1.1.0.0
+지원 게임 버전: 1.1.23
+
+[h1]1. 개요[/h1]
+이 MOD는 Chant of Abundance, Minute Leap, Yin-Yang Iron Skin, Emperor Long Fist를 신일품 핵심 4종 세트로 개편합니다. 초반에만 사용하는 기본 무공이 후반에도 핵심 구성으로 유지되도록 설계되었습니다.
+현추사결은 네 무공을 장기적인 운공 효과의 중심으로 만들고, 고유한 세트 효과를 제공하는 것을 목표로 합니다.
+
+[h2]참고 및 감사[/h2]
+이 MOD의 일부 설계는 아래 MOD에서 영감을 받았습니다. 원작자와 커뮤니티의 참고 자료에 감사드립니다.
+https://steamcommunity.com/sharedfiles/filedetails/?id=3746556210
+
+[h1]2. 업데이트 목록[/h1]
+[h2]업데이트가 보이지 않으면 다시 구독하고 게임을 재시작하세요![/h2]
+[h2]업데이트가 보이지 않으면 다시 구독하고 게임을 재시작하세요![/h2]
+[h2]업데이트가 보이지 않으면 다시 구독하고 게임을 재시작하세요![/h2]
+
+[h2]저장 파일 안전 안내[/h2]
+저장 파일 손상과 붉은 오류를 최대한 방지하는 것이 원칙입니다. 이를 위해 신중한 구현 방식을 선택했고 그 과정에서 많은 어려움이 있었지만, 현재 관련 문제는 해결되었습니다. 예상보다 훨씬 어려운 작업이었습니다.
+그럼에도 오류가 다시 발생하지 않는다고 보장할 수는 없습니다. 양해해 주셔서 감사하며, 문제가 있으면 알려 주세요.
+
+커뮤니티의 작은 영감에 감사드립니다. 이 MOD는 오픈 소스로 공개되어 있습니다.
+소스 코드:
+https://github.com/Umbrella1944/XuanShuFourArts
+
+[h1]1.1.0.0 캐릭터 성장 및 NPC 효과 업데이트[/h1]
+* 정순, 윤회, 나이와 수명 비율, 습득 무공에 따른 캐릭터별 성장 시스템을 추가했습니다.
+* 태오와 NPC가 동일한 효과와 성장 알고리즘을 사용하며, NPC 혈극 및 일반 공격 강화 설정을 제공합니다.
+* 성장은 각 사용자의 실행 시점에 개별 계산되며, 태오의 배율로 공유 설정을 다시 쓰지 않습니다.
+* 선택 가능한 제한 진단 로그를 추가하고, 각력 피해 변환 시 정수가 아닌 피해의 나머지가 사라지던 문제를 수정했습니다.
+
+[h1]1.0.3.0 호환성 및 강도 설정 업데이트[/h1]
+* 게임 버전 1.1.23을 지원합니다.
+* 현재 게임 버전에 맞춰 네 무공의 효과 설정, 혈극 전투 판정 및 장비 화면 연동을 갱신했습니다.
+* 네 무공 각각과 4종 세트 효과에 대한 다섯 가지 독립 강도 설정을 추가했습니다.
+* 각 설정은 10%에서 300%까지 10% 단위로 조정할 수 있으며, 기본값 100%는 기존 균형을 유지합니다.
+* 설정은 해당 속성, 회복, 피해 변환, 혈극 효과 및 세트 효과를 조정합니다.
+* 중국어와 영어 툴팁에 현재 적용된 수치가 표시됩니다.
+
+[h2]1.0.0.1-1.0.1.9 업데이트[/h2]
+자세한 내용은 변경 로그를 참조하세요.
+
+[h1]3. 상세 소개[/h1]
+[h2]전체 설계[/h2]
+초반 전환용 기본 무공 네 가지를 장기적인 구축 기반으로 재구성하는 것이 핵심입니다.
+주요 변경 사항은 다음과 같습니다.
+[list]
+[*]네 무공을 모두 신일품으로 개편합니다.
+[*]원래의 9품 학습 및 사용 요구를 유지합니다.
+[*]네 무공의 정련과 역련 효과를 동일하게 유지합니다.
+[*]이름, 설명, 운공 속성, 시전 효과, 전투 효과 및 일부 표시 로직을 조정합니다.
+[*]관련 체격과 정신 효과를 신일품 위상에 맞게 강화합니다.
+[*]기존의 안정적인 게임 내 전투 효과를 우선 사용하며, 안전한 사용자 정의 경로를 구현했습니다.
+[/list]
+
+[h2]1. 현식귀해경[/h2]
+원래 무공: Chant of Abundance
+유형: 내공
+역할: 내기, 생존, 오래된 상처 회복을 위한 핵심 운공 효과
+
+[h2]2. 조영유신보[/h2]
+원래 무공: Minute Leap
+유형: 신법
+역할: 이동, 생존, 피해 변환을 위한 핵심 신법
+
+[h2]3. 양의환형공[/h2]
+원래 무공: Yin-Yang Iron Skin
+유형: 방어 절기
+역할: 짧은 방어 시간과 상처 재분배를 위한 방어 절기
+
+[h2]4. 만서혈극권[/h2]
+원래 무공: Emperor Long Fist
+유형: 권장 파괴 무공
+역할: 혈극 추격과 축적된 기세 폭발을 위한 핵심 권법
+모든 무기와 일반 공격으로 발동할 수 있습니다.
+
+[h2]주의 사항[/h2]
+Chant of Abundance, Minute Leap, Yin-Yang Iron Skin 또는 Emperor Long Fist를 변경하는 다른 MOD와는 충돌할 수밖에 없습니다.
+관련 무공표, 효과표, 전투 계산 또는 툴팁을 수정하는 MOD와도 호환 문제가 발생할 수 있습니다.
+가능하면 이 MOD를 유사한 무공 변경 MOD보다 나중에 로드하세요. 실제 결과는 게임 내 효과를 기준으로 합니다.
+이 MOD는 안전한 외부 계층에 해당하며, 저장 도중 추가하거나 제거하는 경우에도 붉은 오류가 발생하지 않도록 설계되었습니다.
+구조는 최대한 간결하게 유지하고 코드 논리도 안전하게 구현했으므로, 원칙적으로는 붉은 오류 가능성이 낮습니다.
+다만 붉은 오류, 표시 문제, 효과 덮어쓰기 또는 버전 호환 문제가 전혀 없다고 보장할 수는 없습니다. 문제가 발생하면 의견을 남겨 주세요.
+
+지원해 주셔서 감사합니다.
+
+향후 개발할 NPC 활동 MOD의 기반으로 사용할 전제 프레임워크 MOD도 제작했습니다. 관심이 있으면 사용해 보세요.
 Taiwu Interaction Framework
 https://steamcommunity.com/sharedfiles/filedetails/?id=3749605687
 
@@ -284,9 +384,12 @@ internal static class GrowthSettingTexts
         switch (ModLanguage.Normalize(language))
         {
             case "CN":
-            case "CNH":
                 displayName = text.CnName;
                 description = text.CnDesc;
+                break;
+            case "CNH":
+                displayName = ModLanguage.ToTraditionalChinese(text.CnName);
+                description = ModLanguage.ToTraditionalChinese(text.CnDesc);
                 break;
             case "KO":
                 displayName = text.KoName;

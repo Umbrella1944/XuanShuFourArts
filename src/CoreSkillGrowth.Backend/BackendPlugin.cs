@@ -1,4 +1,5 @@
 using CoreSkillGrowth.Shared;
+using GameData.Domains.Global;
 using HarmonyLib;
 using TaiwuModdingLib.Core.Plugin;
 
@@ -23,5 +24,15 @@ public sealed class BackendPlugin : TaiwuRemakePlugin
     public override void Dispose()
     {
         _harmony?.UnpatchSelf();
+    }
+}
+
+[HarmonyPatch(typeof(GlobalDomain), "ReloadAllConfigData")]
+internal static class LanguageReloadPatch
+{
+    [HarmonyPostfix]
+    private static void ReapplyCoreSkillConfig()
+    {
+        CoreSkillGrowthConfigPatch.ApplyAll("Backend/LanguageChange");
     }
 }

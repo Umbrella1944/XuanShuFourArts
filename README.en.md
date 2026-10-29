@@ -25,7 +25,7 @@ Compatibility validation and remaining in-game checks: [1.1.23 maintenance repor
 - Uses independent empty effect shells plus backend patches for the four core passives, avoiding changes to the original vanilla effect entries.
 - Reworks Myriad-Devouring Blood-Rift Fist into an independent backend passive: a complete Normal Attack sequence that lands at least once can gain Blood-Rift stacks and trigger a forced-hit, guaranteed-critical pursuit that does not trigger bounce damage.
 - Adds in-game set tooltip support with Alt details, while suppressing the large set tooltip during combat.
-- Supports CN/CNH/EN/KO in-game text at game startup, with Chinese fallback for unknown languages.
+- Supports CN/CNH/EN/KO in-game text and runtime language switching, with Chinese fallback for unknown languages.
 - Adds five independent strength sliders (10%–300%, step 10%): four individual arts and the four-piece bonus. All default to 100%; restart after changes.
 - Adds per-character growth using the same algorithm for Taiwu and NPCs, with configurable Consummate, reincarnation, lifespan-relative age and learned-skill weights.
 - Adds an NPC Blood-Rift and Normal Attack bonus toggle, enabled by default, and an optional rate-limited debug logging toggle.
@@ -106,7 +106,7 @@ Build outputs are written to `.tmpbuild/<Configuration>/Plugins/`. Debug outputs
 - This mod patches the four base sectless martial arts: Chant of Abundance, Minute Leap, Yin-Yang Iron Skin, and Emperor Long Fist.
 - It may conflict with other mods that modify these martial arts, related combat-skill data tables, effect tables, or display logic.
 - Breakthrough compatibility uses minimum safeguards and should not override stronger success-rate changes from other mods.
-- After changing the game language, fully exit and restart the game.
+- Skill configuration is reapplied automatically after a language change; only mod setting changes require a full restart.
 
 ## License
 

@@ -8,7 +8,8 @@
 - Fixed Stamina damage conversion discarding non-integer damage remainders.
 - Added rate-limited diagnostics and an optional debug logging toggle; separated Debug and Release build outputs.
 - Added tooltip lifecycle cleanup and state-based refresh to reduce repeated layout work.
-- Added Korean localization for settings, arts, effects and tooltips; CNH uses Chinese text and unknown languages fall back to Chinese.
+- Added Korean localization for settings, arts, effects, tooltips and mod details; CNH uses Traditional Chinese and unknown languages fall back to Chinese.
+- Reapplied skill configuration after frontend and backend language reloads, preserving all four arts during runtime language switches.
 
 ## 1.0.3.0
 

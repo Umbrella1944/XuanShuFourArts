@@ -143,8 +143,9 @@ internal static class StrengthDescriptions
         switch (ModLanguage.Normalize(language))
         {
             case "CN":
-            case "CNH":
                 return $"完整普通攻击结算后，若本轮普通攻击至少命中1次，有{StrengthSettings.BloodRiftChance}%机率获得2层血隙并触发1次血隙追击；每层血隙使血隙追击威力+{StrengthSettings.BloodRiftPowerPerStack}%，最多10层并持续整场战斗。血隙追击必中、必重创，且无法被反震；进入伤害结算时消耗全部血隙。";
+            case "CNH":
+                return ModLanguage.ToTraditionalChinese(BloodRift("CN"));
             case "KO":
                 return $"일반 공격이 끝난 후 한 번 이상 명중하면 {StrengthSettings.BloodRiftChance}% 확률로 혈극 2중첩과 혈극 추격 1회가 발동합니다. 중첩마다 혈극 추격 위력이 {StrengthSettings.BloodRiftPowerPerStack}% 증가하며 전투 중 최대 10중첩됩니다. 혈극 추격은 반드시 명중하고 치명타가 되며 반격 피해를 받지 않습니다. 피해 계산 시 모든 혈극 중첩을 소모합니다.";
             case "JP":

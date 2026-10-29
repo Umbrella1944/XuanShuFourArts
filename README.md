@@ -88,7 +88,7 @@ dotnet build src/CoreSkillGrowth.Frontend/CoreSkillGrowth.Frontend.csproj -c Rel
 - 修改沛然决、小纵跃功、水火引气功、太祖长拳的 MOD 可能与本 MOD 冲突。
 - 修改相关功法表、特效表、战斗结算或提示界面的 MOD 也可能存在兼容问题。
 - 突破兼容只提供最低保障，不覆盖其他 MOD 提供的更高成功率。
-- 切换游戏语言后需要完整重启游戏。
+- 切换游戏语言后会自动重新应用四诀配置，无需仅为语言切换重启游戏；修改 MOD 设置仍需完整重启。
 
 ## 许可
 

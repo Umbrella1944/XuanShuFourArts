@@ -1,4 +1,5 @@
 using CoreSkillGrowth.Shared;
+using FrameWork;
 using HarmonyLib;
 using TaiwuModdingLib.Core.Plugin;
 
@@ -19,10 +20,21 @@ public sealed class FrontendPlugin : TaiwuRemakePlugin
 
         CoreSkillGrowthConfigPatch.ApplyAll("Frontend");
         GrowthLocalization.Apply(ModIdStr);
+        GEvent.Add(UiEvents.OnLanguageChange, OnLanguageChange);
+    }
+
+    private void OnLanguageChange(ArgumentBox argBox)
+    {
+        CoreSkillGrowthConfigPatch.ApplyAll("Frontend/LanguageChange");
+        GrowthLocalization.Apply(ModIdStr);
+        FourSetUiState.Reset();
+        FourSetMouseTipPanelPatch.ResetCache();
+        FourSetNewTooltipCombatSkillPatch.HideFloatingHint();
     }
 
     public override void Dispose()
     {
+        GEvent.Remove(UiEvents.OnLanguageChange, OnLanguageChange);
         _harmony?.UnpatchSelf();
         FourSetNewTooltipCombatSkillPatch.Dispose();
         FourSetMouseTipPanelPatch.ResetCache();
